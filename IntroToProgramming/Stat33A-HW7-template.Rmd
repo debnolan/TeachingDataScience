@@ -1,0 +1,449 @@
+---
+title: 'Homework 7: Case Study - Food Safety, Part 2'
+author: "A solution"
+output: pdf_document
+---
+
+# Introduction
+
+We continue with the analysis of the restaurant inspection scores from
+HW 6. In this HW we investigate the specific violations and try to 
+associate different sorts of violations with scores.
+
+Rather than repeating all of our earlier work of cleaning, grouping,
+and joining the business and inspection data, we begin where we left off
+in HW 6 and load the data frame created.
+The call to `load()` below loads in a data frame that should be the same as (or close to) the one you created in HW 6. In addition, we read in the violations raw data file.
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/rest16.rda"))
+
+vio = read.csv(url("http://www.stat.berkeley.edu/users/nolan/data/violations.csv"), 
+               stringsAsFactors = FALSE)
+```
+
+We will also need the `checkGran()`  function that you wrote in HW 6.
+Copy it into the code chunk below.
+```{r}
+checkGran = function( ) {
+  
+}
+```
+
+
+
+Load the libraries: ggplot2, dplyr and tidyr.
+```{r,echo=FALSE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+```
+
+
+# Violations Data
+
+Confirm the names of the variables in `vio` with a call to  `names()`:
+
+```{r}
+
+```
+
+Notice that we have only 3 variables in violations data frame. We are familiar with the business id and the date of the inspection. 
+
+As with the first two data frames, we want to determine the granularity, i.e.,
+we want to ascertain what uniquely defines the records.
+
+Use your `checkGran()` function from HW 6, and call it three times:
+
++ with `business_id` as the key
++ with `business_id` and `date`
++ with `business_id` and `date` and `description`
+
+```{r}
+checkGran( )
+checkGran( )
+checkGran( )
+```
+
+### Q. Doess the combination business_id and inspection date uniquely identify the records?
+
+ANS: 
+
+
+Examine the first 20 records of `vio`.
+
+```{r}
+head(vio, 10)
+```
+
+Just visually inspecting the first few records in `vio` we see that each inspection has multiple entries. Reading the descriptions, we see that if corrected, a date is listed in the description within square brackets. This date appears to be the same date as the inspection.
+
+## Narrow down the data
+
+Recall that our data frame `ins.bus2016` has information only about 
+the inspections in 2016. 
+Narrow the violations data to contain information only on the inspections in `ins.bus2016`. 
+
+To do this, use the `semi_join()` function. 
+Specifically, use `business id` and `date` from `ins.bus2016` to drop the violations from `vio` for other years and inspections. Call this new data frame `vio2016`.
+
+```{r,error=TRUE}
+vio2016 = semi_join( )
+```
+
+
+## Number of violations
+
+As we explore data, we often create new variables that we think might be useful in our analysis, such as the number of violations per inspection.
+
+To see if this variable may be of interest, call `count()` and assign it to `num_vio`.
+                   
+```{r,error=TRUE}
+num_vio = count( )
+head(num_vio)
+```
+
+
+
+Make a histogram of `n` in `num_vio`.
+
+```{r}
+
+
+```
+
+### Q. Describe the distribution of the number of violations.
+
++ The number of violations has a long/short left/right tail
++ Most inspections have xx to yy violations.
++ Inspections with more than xx violations are rare 
++ Inspections with xx violations are not shown in this histogram.
+
+
+## Summary of findings
+
+Let's take stock of what we have learned about the violations data and what might be the next steps in our investigation. We found that:
+
+* Each record corresponds to one violation that was found on an inspection. 
+* When a violation is corrected this information is provided in the description field.
+* The distribution of the number of violations shows that some restaurants had many violations. 
+
+
+# Examine the violations
+
+In order to gain more insight into the violations, 
+we will need to derive numeric variables from the violation description. 
+For example, we can derive logical variables that indicate:
+
+* Whether the violation was corrected.
+* Whether the violoation is high risk
+* Whether the violation involved the absence/presence of, say, vermin, human cleanliness, floor cleanliness, etc.
+
+
+## Corrected violations
+
+We noticed earlier that when a violation is corrected, the description includes information about when it was corrected, e.g. [ date violation corrected: 9/1/2016 ].  
+
+We have not seen the square brackets used otherwise in a description so
+we can write code to look for a square bracket in the description and use
+it to indicate whether the violation was corrected.
+
+We can use the function `grepl()` to search for a left square bracket `[` in the description of a violation.
+Let's try it out. We set up a test vector or 3 descriptions with:
+```{r,error=TRUE}
+testd = vio2016$description[1:3]
+testd
+```
+
+Then we search in them for "[" with
+```{r,error=TRUE}
+grepl("\\[", testd)
+```
+
+Create a new variable called `corrected` in `vio2016` that is a logical 
+vector that is TRUE if the violation was corrected and FALSE if not.
+```{r,error=TRUE}
+vio2016$corrected = grepl( )
+```
+
+### Q. How many violations were corrected? not corrected?
+
+```{r}
+
+```
+
+## Clean the description
+
+Before we continue deriving variables, we clean the descriptions so that it will be easier to find patterns.  
+The code below converts any upper case letters to lower case letters.
+That way we don't have to look for "High risk" and "high risk".
+It also eliminates extra blanks and the corrected information so that 
+the descriptions are more uniform.
+
+```{r,error=TRUE}
+vio2016$description = tolower(vio2016$description)
+vio2016$description = sub("[[:blank:]]{2,}", "", vio2016$description)
+vio2016$description = sub("\\[.*\\]", "", vio2016$description)
+```
+
+
+## Risk of a violation
+
+Use `grepl()` to create a logical vector, called `hi_risk`, according to whether or not the term "high risk" appears in the description.
+This vector should be added to `vio2016`.
+
+```{r,error=TRUE}
+vio2016$hi_risk = grepl(  )
+```
+
+### Q. How many high risk violations are there? 
+
+```{r}
+
+```
+
+
+## Common and rare violations
+
+Now that the violations are more uniform in appearance, we can 
+table them and examine the most and least common. 
+
+
+Use `count()` to create a table of counts of the descriptions in `vio2016` and call it `vioTable`.
+
+```{r,error=TRUE}
+vioTable = count( )
+```
+
+### Q. How many unique violation descriptions are there?
+
+```{r}
+
+```
+
+ANS: 
+
+
+The following call will arrange the table in order according to the counts and display the top 25.
+```{r,error=TRUE}
+head(arrange(vioTable, desc(n)),25)
+```
+
+
+Also, examine the 20th to the 30th most common.
+```{r}
+
+```
+
+
+And, examine the 10 least common.
+
+```{r}
+
+```
+
+
+## Derive violation indicators
+
+Create at least 8 indicator variables (logical vectors) that indicate a certain kind of violation. Try to have some of these variables group descriptions with a common theme together. For example, does the desctiption mention rats, mice, or other vermin? Is it related to the cleanliness of the workers in the restaurant? Or the facilities?
+
+
+To begin create a list of terms, where the list is of length >=8, and each element in the list is a character vector of themed words. Call this list `vio_types` and name each element according to the type of violation that it represents. Use your investigations of `vioTable` to create your vectors of words. You may want to reexamine the descriptions in `vioTable` more carefully as you go.
+
+We created a short list of two character vectors for you as a starting point. You may add more terms to those two vectors, and you are to create at least 6 more vectors.
+
+```{r}
+vio_types = list(
+  unclean = c("unsanitary", "unclean", "clean"),
+  human = c("hand", "hair", "nail")
+  
+)
+```
+
+Next, write a function called `search_terms()` that will search 
+in the descriptions for any of the terms in a character vector.
+
+The inputs and output to this function are:
+
++ `x`: required vector of descriptions to search in
++ `terms`: required vector of words/terms to search for
++ logical vector the same length as `x` in which an element is TRUE if any of the terms were found in the corresponding element of `x`
+
+You will need to use `grepl()` and a for loop. One approach is the following:
+
++ set up a logical vector of the correct length to start (use `vector()`)
++ loop over each term in `terms`
++ for each execution of the loop, update the logical vector according to which elements of `x` contain the term
+
+```{r}
+search_terms = function(x, terms){
+  
+  
+}
+```
+
+Test your function with the following code.
+
+```{r}
+x = c("hi there", "bye there", "bye cat for now", "it is a cat")
+
+search_terms(x, c("cat", "bye"))   #returns FALSE  TRUE  TRUE  TRUE
+search_terms(x, c("z", "now", "cat")) #returns FALSE FALSE  TRUE  TRUE
+search_terms(x, c("there"))    #returns TRUE  TRUE FALSE FALSE
+search_terms(x, c("z", "abc"))  #returns FALSE FALSE FALSE FALSE 
+```
+
+
+Create your indicator variables with a call to `lapply()`
+```{r,error=TRUE}
+dummies = lapply( )
+dummies = as.data.frame(dummies)
+```
+
+Check that your variables have a reasonable number of TRUEs,
+```{r,error=TRUE}
+sapply(dummies, sum)
+```
+
+
+Add your indicator variables to the `vio2016` data frame with a call to `bind_cols()`.
+
+```{r,error=TRUE}
+vio2016_all = bind_cols( )
+```
+
+
+##  Collapsing violations
+
+In order to join the violations data with the inspection data, we need
+to aggregate the violations data up to the inspection level.
+
+Use `group_by()` and `summarize()` to do this. The grouped and summarized data should have the following variables:
+
++ `business_id`
++ `date`
++ `num_vio`: the number of violations in the inspection
++ `hi_risk`: the number of high risk violations in the inspection
++ `corrected`: the number of corrected violations in the inspection
++ `unclean`: TRUE if any of the violations had one of the unclean terms
++ `human`: TRUE if any of the violations had one of the human terms
++ plus at least 6 additional TRUE/FALSE variables 
+
+Call this aggregated data frame, `vio2016agg`
+```{r,error=TRUE}
+vio2016agg = group_by(  )
+vio2016agg = summarize(vio2016agg )
+```
+
+
+## Joining violations and inspections
+
+Join `vio2016agg` with the inspection data frame `ins2016M.B`. 
+You will want to keep all the records in the inspection data frame. 
+Call this new data frame, `ins.vio2016`
+
+```{r}
+ins.vio2016 = 1
+```
+
+Note that some restaurants were inspected and no violations listed,
+even when the score is not perfect. These records will have NA in all of the
+violation variables. Will want to replace some of the values in these variables, especially the `num_vio` should be set to 0. And the logicals should be set to FALSE.  The `replace_na()` function does this.
+Complete the code below to replace all NAs in `num_vio`, `hi_risk`, `corrected`, `unclean`, `human`, and the rest of your indicator variables.
+
+```{r,error=TRUE}
+ins.vio2016 = replace_na(ins.vio2016, 
+                  list(num_vio =0, hi_risk = 0))
+```
+
+# Exploring violations and scores
+
+Now that we have combined the data, we can explore the relationship 
+between the violations and inspection scores.
+
+## Score and Number of violations
+
+Make a scatterplot of the inspection score and number of violations 
++ the number of violations and the number of corrections for 
+restaurants with multiple violations
+
+
+```{r}
+
+
+```
+
+## Corrections and number of violations
+
+Make a scatterplot of the number of violations and the number of corrections for restaurants with multiple violations.
+
+```{r}
+
+
+```
+
+## Score and high risk violations
+
+Make side-by-side boxplots of the score versus the number of high risk violations.
+
+```{r}
+
+
+```
+
+
+### Q. Roughly how do 1 and 2 high risk violations impact the score?
+
+ANS: 
+
+## Impact of a violation
+
+Make boxplots for all of the violation types that you have created.
+Use the code below as a starting point. Try to arrange the boxplots
+in order of the median score for the TRUEs.
+
+```{r,error=TRUE}
+p0 = ggplot(ins.vio2016, aes(y = score))
+p1 = p0 + geom_boxplot(aes(x = unclean))
+p2 = p0 + geom_boxplot(aes(x = human))
+
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+### Q. Which three violations seem to impact the score the most? 
+
+ANS: 
+
+## Combinations of violation types
+
+Below is a set of boxplots that examine the impact on the score of 3 different 
+types of violations. 
+
+```{r,error=TRUE}
+ggplot(ins.vio2016, aes(y = score)) + 
+  geom_boxplot(aes(x = vermin, fill = food)) +
+  facet_wrap(~ human)
+
+```
+
+Make another combination of boxplots for 3 types of violations.
+
+```{r}
+
+
+```
+
+### Q. Were you able to uncover a combination of violation impacts the score a lot?
+
+ANS: 
+
+### Q. Summarize your discoveries into 3 statments about restaurant food safety.
+
+### 1.
+
+### 2.
+
+### 3. 
+
+

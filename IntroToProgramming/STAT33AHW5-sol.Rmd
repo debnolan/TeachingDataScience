@@ -1,0 +1,217 @@
+---
+title: 'Subsetting and Writing Functions'
+author: Your Name
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+## Introduction
+
+The main goal of this HW is for you to gain practice writing functions. 
+You will write very simple functions that performs a specified task.
+Each function will consist of a few lines of code. 
+
+Recall that when writing a function you carry out the following steps:
+
++ Describe the task that you want to carry out and write code to carry out the task for a sample input. (that is, don't worry about the function yet).
++ Identify the arguments for the function, along with which are required and which have default values.
++ Identify the output of the function, i.e., what is the return value.
++ Take the code you wrote in step 1 and incorporate it into the function
+
+
+
+## Subsetting with `[ ]`
+
+Before you begin the function coding exercises, here are a few questions to
+give you practice vwith subsetting using square brackets.
+
+You will redo some of the subsetting exercises with the `sailor2` dataset that we saw in Lecture 8.  This time using square brackets.
+
+Load the dataset-
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/toyboat.rda"))
+```
+ 
+### Question 1 - Subset colums
+
+Create a subset of `sailor2` that contains only the `age` and `sid` columns. Note - You have to subset using `[ ]`
+```{r}
+sub1 = sailor2[c("age", "sid")]
+sub1
+```
+### Question 2 - Subset rows 
+
+Create a subset of `sailor2` that contains the names and ids of sailors who have a rating higher than 8. Note - You have to subset using `[ ]`
+```{r}
+sub2 = sailor2[sailor2$rating > 8, c("sname", 'sid')] 
+sub2
+```
+
+## Writing functions
+
+
+### Question 3
+
+1. Your first function is to clean a numeric vector by replacing "bad" values
+with an acceptable value. Conceptually, the code will do the following:
+
+```{r,eval=FALSE}
+x[badVals] = goodVal
+```
+
+Here `badVals` is a logical vector that is TRUE for each element of x that is NA or Inf or -Inf.
+
+And `goodVal` is the value to use to replace the bad values.
+
+2. Use the following information to write your function definition below.
+
++ Call the function `cleanVals`
++ Have the function take two input arguments: `x` a required vector and 
+`replace` the replacement value (which has a default value of 0). 
+Add an argument named replace and assign it a default value of 0
+
+```{r}
+#Change the code below to create a function definition
+# that matches the information above.
+cleanVals = function(x, replace = 0) {
+  
+}
+```
+
+3. This function requires only three lines of code.
+
++ Create `badVals` as a logical vector that is TRUE for each element of x that is NA or Inf or -Inf.
+
++ Use `badVals` to assign the corresponding elements of `x`, the value in `replace`. Hint, the example code in Step 1 above should guide you 
+
++ Return the modified x vector.
+
+
+Copy your function definition from Step 2 into the code block below and
+fill in the body of the function with these two lines of code. 
+
+```{r}
+#Copy your function definition from the previous code block
+# and complete the body of the function
+cleanVals = function(x, replace = 0) {
+  
+  badVals = x == Inf | x == -Inf | is.na(x)
+  x[badVals] = replace
+  return(x)
+}
+
+```
+ 
+    
+4. After you've made the changes, run the following 2 tests for your function.
+```{r,error=TRUE}
+y1 = c(1, Inf, 2, -Inf, 3, NA, 4)
+cleanVals(y1)
+```
+
+The result should be # 1 0 2 0 3 0 4
+ 
+```{r,error=TRUE}
+y2 = c(Inf, -Inf, 1, 2, 3, NA)
+cleanVals(y2*3,2)
+```
+The results should be # 2 2 3 6 9 2
+ 
+ 
+### Question 4
+ 
+For your next coding exercise, you are to write a function to calculate mean of the numbers after trimming any negative infinity values.
+
+Specifically, the function has the follwoing characteristics:
+
++ the function is called `lowerTrim`
++ one argument is `x`, which has no default value. This argument is the 
+vector to be trimmed.
++ a second argument is `trimBelow` which has a vdefault value of - infinity. This argument is the lower threshold. That is, only values that exceed it
+are to be kept
+
+Write the function signature in the code block below.
+
+```{r}
+#Change the code below to create a function definition
+# that matches the information above.
+lowerTrim = function(x, trimBelow = -Inf) {
+  
+}
+```
+
+
+Next copy the signature from above and insert the code to do the following:
+
++ Calculate the mean of the values of `x` that exceed the threshold `lowerTrim`
+
+You may co this all in one line of code, of if it is easier to break it into steps, then you can first create a logical vector that indicates which elements of `x` exceed the threshold. Then take the mean of the corresponding subset of `x`.
+```{r}
+#Copy your function definition from the previous code block
+# and complete the body of the function
+lowerTrim = function(x, trimBelow = -Inf) {
+  
+  trim.x = x > trimBelow
+  return(mean(x[trim.x]))
+  
+}
+
+```
+
+Lastly, test this function. The results from the code below should be 2.5.
+```{r,error=TRUE}
+y=c(1, -Inf, 2:4, -Inf)
+lowerTrim(y)
+```
+
+### Question 5 - Roulette
+
+For your final function, you will write code to simulate the gains and losses  from playing Roulettte. We will only take the most simple bet on red for each spin of the wheel. Here is a brief explaination of the game -
+
+Roulette is a casino game where players make bets (on a color, a number, or a set of numbers). The dealer throws a ball into the spinning roulette wheel and, depending on which pocket the ball lands, the player loses or wins. 
+
+There are a total of 38 pockets on the American roulette wheel, ranging from 0 to 36, plus the additional 00 number. 18 of these pockets are red, 18 are black, and the two slots featuring 0 and 00 are green.
+ 
+In our game, a bet is always on the ball landing in one of the red pockets. If it lands an a red pocket, then you win the amount you bet. That is, if you bet $1, then you keep your $1 and the casino pays you $1 more. But, if it lands on black or green, then you lose your bet. So for every bet, you either lose the amount you bet, or you gain that amount.
+ 
+Write a function to calculate the amount of money you gain after placing *n* bets of amount *x* on each bet. 
+Here are some of the requirements for the function:
+
++ Call the function `betRed`
++ Call the number of bets to place `numBets`. It is a required argument to the function.
++ Call the amount to bet, `betAmt`, and give it a default value of 1.
++ The function should return the wins/losses from the bet. For example, if you place 10 bets of $2 and lose them all then the return value is -$20. On the other hand, if you win 5 and lose 5, then your winnnings are 0.
+
+Here are some ideas to get you started:
++ Consider making a vector of +1 and -1 to represent the red, green and black pockets on the wheel. The `rep()` function may be useful.
++ Use `sample()` function to simulate the bets. Read the arguments to the function carefully. 
++ Since we are only reporting the net winnings, does it matter what order the +1 and -1 come in?
++ Consider some scenarios of how you might calculate the net gain. 
+   + Suppose you bet 5 times and win 2 times.
+   + What is the net gain when you bet $1?  $2? $3?
+   + Can you find a simple formula to calculate the winnings/losses?
+
+```{r}
+betRed = function(numBets, betAmt = 1) { 
+  
+  wheel = rep(c(-1, 1), c(20, 18))
+  results = sample(wheel, size = numBets, replace = TRUE)
+  
+  return(sum(results)*betAmt)
+}
+
+```
+
+
+The following code tests your function. It bets $1 on 100 bets.
+Then repeats the "game" 1000 times and makes a histogram of the 1,000
+values from the game. What lesson can you learn about roulette from this 
+simulation study?
+```{r,error=TRUE}
+wins = replicate(1000, betRed(numBets = 100))
+
+hist(wins)
+```
+ 
+ 

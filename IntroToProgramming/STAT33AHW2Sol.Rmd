@@ -1,0 +1,130 @@
+---
+title: 'US Presidential Elections: A Case Study'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read the file 
+
+The file is located on the web at
+http://www.stat.berkeley.edu/users/nolan/data/usPres.txt
+
+Examine the contents of the file and determine the format.
+
++ Is it plain text?
++ Is it delimited? What are the delimiters?
++ Does it have a header?
+
+Use the answers to these questions to write code to
+read the file into *R*.
+Assign the return value to `usp`.
+
+```{r readit}
+usp =  read.csv(url("http://www.stat.berkeley.edu/users/nolan/data/usPres.txt"),
+                header = TRUE)
+```
+
+## Check the data frame
+
+Examine the data frame.
+
++ What are the number of rows and columns?
++ What are the names of the variables?
++ Do the first few rows look ok? What about the last few?
+
+```{r checkit}
+dim(usp)
+head(usp)
+tail(usp)
+```
+
+
+Look at summary statistics for each of the variables.
+Does everything look in order?
+
+```{r}
+summary(usp)  #run this code
+```
+
+## Check Data Types
+
+Confirm that the variables that are factors should be.
+
+```{r changeType}
+sapply(usp, class)  #run this code
+```
+
+Should the names of the winners and losers be factor or character?
+
+Convert them to character strings and reassign to the data frame.
+Replace the existing variables with the new ones. That is,
+the end result should have the same number of vectors.
+```{r}
+usp$Win = as.character(usp$Win)
+usp$Lose = as.character(usp$Lose)
+sapply(usp, class)
+```
+
+
+## Explore
+
+Below are five questions for exploration.
+Use the `filter()`, `select()` and `slice()` functions in the 
+`dplyer` package to help you.
+Also consider the `table()`, `mean()` and other simple summary functions.
+Assign the answer for each question to Expn, for n = 1, 2, 3, 4, 5.
+
+```{r}
+require(dplyr)
+```
+
+
+1. Names of Presidents who did not get over 50% of the vote.
+```{r}
+Exp1 = select( filter(usp, percent < 0.5), Win)
+
+Exp1
+```
+
+
+2. Year and name of presidents who lost popular vote, but won the election
+```{r}
+Exp2 = select( filter(usp, margin < 0), Yr, Win)
+
+Exp2
+```
+
+
+3. Party and names of candiate who won the popular vote, but lost the election
+```{r}
+Exp3 = select( filter(usp, margin < 0), Yr, Lose)
+
+Exp3
+```
+
+
+4. Proportion of times Dems vs Reps won the election
+```{r}
+Exp4 = table(usp$win_party)/nrow(usp)
+
+Exp4
+```
+
+5. Presidents who only served one term
+
+```{r}
+
+countWins = table(usp$Win)
+countWins = as.data.frame(countWins)
+
+Exp5 =filter(countWins, Freq == 1)
+
+Exp5
+```
+

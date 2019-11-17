@@ -1,0 +1,71 @@
+---
+title: "HW1-33A"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Call Expressions
+
+### The Normal Curve
+
+The standard normal curve is centered at 0 and has a spread, AKA standard deviation, of 1. This curve is drawn in the figure below along with a normal curve that has a center of 2 and a spread of 1.5 (dashed curve).
+
+```{r}
+curve(dnorm, from = -3, to = 6, ylab = "Density")
+curve(dnorm(x, mean = 2, sd = 1.5), add = TRUE, lty = 2)
+```
+
+
+The family of normal curves all have the same shape and each is uniquely specified by its center (mean) and spread (standard deviation)  
+
+
+1. Read the documentation for `rnorm()` to figure out how to call `rnorm()` to generate 5 random values from a normal distribution with mean 17 and standard deviation 3.
+```{r}
+# Your Code goes here
+```
+
+2. Create a vector called `normSamps` containing 1000 random values from a normal distribution with mean 1 and standard deviation 2.
+```{r}
+# Replace the 1 on the right hand side of the equation with your code. Do not modify the call to set.seed()
+set.seed(66)
+normSamps = 1
+```
+
+3. The 10% trimmed mean is obtained by taking the mean of the middle 80% of the values (removing the lowest 10% and the highest 10% of the values). Find the 10% trimmed mean of normSamps and assign this value to `mean10`. 
+Hint: Look at the help file for the mean() function.
+```{r}
+# Replace the 1 on the right hand side of the equation with your code.
+mean10 = 1
+```
+
+4. Use `sum()` to calculate the fraction of values in 
+`normSamps` that are less than 3. 
+Write your solution so that it coerces a logical vector to numeric without using the function as.numeric().
+Write your code generically so that it doesn't depend on
+`normSamps` being a vector of 1000 elements.
+Assign the fraction to the variable `frac3`
+Hint: consider using the `length()` function.
+```{r}
+# Replace the 1 on the right hand side of the equation with your code
+frac3 = 1
+```
+
+
+
+5. A percentile is the value at which a given percentage of samples fall at or below it and is sometimes synonomously called a quantile, e.g., the 90th percentile is the value at which 90% of data values fall at or below it. Calculate the 90th percentile of `normSamps` and assign this value to `per90`. 
+Hint: The `quantile()` function is helpful for this question.
+```{r}
+# Replace the 1 on the right hand side of the equation with your code
+per90 = 1
+```
+
+
+
+6. Calculate the greatest absolute distance from 1 for the values in `normSamps`. Assign this value to a variable called `maxDev`, short for "maximum deviation" from the mean. Hint: The functions abs() and max() are helpful for this question.
+```{r}
+# Replace the 1 on the right hand side of the equation with your code
+maxDev = 1
+```
