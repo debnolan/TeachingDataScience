@@ -1,0 +1,119 @@
+---
+title: 'EDA: Bike Sharing'
+author: "lab template"
+output:
+  pdf_document: default
+---
+
+```{r, collapse=TRUE}
+require(readr)
+require(ggplot2)
+require(tidyr)
+require(dplyr)
+```
+
+
+## Introduction
+
+*REMEMBER TO KNIT TO PDF AND UPLOAD TO GRADESCOPE*
+
+If you need help knitting to PDF, visit the GSIs office hours and/or attend lab session. 
+
+*KNIT THIS DOCUMENT NOW - AT THE START OF YOUR WORK TO MAKE SURE THAT YOU CAN KNIT TO PDF*
+
+Load the Rda file in to your R session.
+It contains two dataframes. The one called `bike' is at the hourly level and the one called `bike_day' is aggregated to the daily level. 
+These dataframes contain all of the new and derived variables from the earlier section.
+
+```{r}
+load(url("https://www.stat.berkeley.edu/~nolan/Pretoria/data/bikeshare.rda"))
+```
+
+
+### 'bike_day'
+
+The variables in the 'bike_day' data frame are defined as:
+
+* `registered': total number of registered riders for each day
+* `casual': total number of casual riders for each day
+* `weekday': day of the week (Sun, Mon, ...) 
+* `workingday': whether that day is a working day or not (yes, no)
+* `holiday': whether that day is a holiday or not (yes, no)
+* `season': season (spring, summer, fall, winter)
+* `mnth': month
+* `temp': average hourly temperature for the day
+
+  
+### 'bike'
+
+The granularity of this data frame is at the hourly level.
+Each record represents one hour of a day in 2011-2012.
+
+  - instant : integer representing hour and day as an integer
+  - season : season (1:spring, 2:summer, 3:fall, 4:winter)
+  - yr : year (0: 2011, 1:2012)
+  - mnth : month ( 1 to 12)
+  - hr : hour (0 to 23)
+  - holiday : whether day is holiday or not
+  - weekday : day of the week
+  - workingday : if day is neither weekend nor holiday
+  - weathersit : 
+      - 1: Clear or partly cloudy 
+      - 2: Mist + clouds
+      - 3: Light Snow or Rain
+      - 4: Heavy Rain or Snow
+  - temp : Normalized temperature in Celsius (divided by 41)
+  - atemp: Normalized feeling temperature in Celsius (divided by 50)
+  - hum: Normalized percent humidity (divided by 100)
+  - windspeed: Normalized wind speed (divided by 67)
+  - casual: count of casual users
+  - registered: count of registered users
+  - cnt: count of total rental bikes including casual and registered
+  - nweDate : the data in a special date format
+  
+
+
+## Plot #1
+
+Use `bike_day` to plot two over laid histograms of registered and casual rider counts, where the histograms are distinguished by colore and the bars are filled with somewhat transparent color
+so that we can see where the two histograms overlap.  
+
+```{r}
+
+
+```
+
+
+## Plot #2
+
+Use the `bike_day` data frame to examine the relationship between casual and 
+registered riders.
+To address the issue of overplotting, instead of plotting points (`casual` againt `registered`),
+use a kernel density plot. Use the  `geom_density_2d()` geom.
+
+```{r}
+
+
+```
+
+
+
+## Plot #3
+
+In class we "stacked" the `bike` data frame:
+
+```{r}
+bikeStack =  gather(bike, "rider", "count", casual, registered)
+```
+
+
+
+Lastly, use `bikeStack` to examine how the rider counts vary by time of day.
+Use `geom_smooth()` to smooth the counts over hour of the day.
+Produce comparisons of the casual and registered riders.
+
+```{r}
+
+
+```
+
