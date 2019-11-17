@@ -1,0 +1,103 @@
+---
+title: 'Lab #2: Three ggplot Plots'
+output:
+  pdf_document: default
+---
+
+
+```{r, echo=FALSE}
+require(dplyr)
+require(ggplot2)
+```
+
+Run this chunk only once to install LaTeX, which will allow you to knit the document to PDF. 
+```{r eval = F}
+# remove eval = F from the following line to install
+# run this chunk only once
+install.packages('tinytex')
+tinytex::install_tinytex()
+```
+
+## Prepare
+
+We will use the babies data for this labn.
+
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/babies.Rda"))
+```
+
+Your task is to make 3 plots. We have provided written descriptions
+of what each plot is expected to display. Be sure to review the lecture handout for tips on how to make plots. Also, you may want to 
+search online for how to make some of plots.
+
+
+Like in class, you will examine just the babies born to mothers who never smoked and mothers who smoked while pregnant. We use the `filter()` function in the `dplyr` package to select the rows.
+Change the x-axes scale so that the smallest observation is cut out of
+the picture.
+
+```{r}
+babies2 = filter(babies, smoke == "Never" | smoke == "Current")
+```
+
+
+## Plot #1
+
+Make a scatter plot of father's height against mother's height.
+Jitter the points so that they do not overlap as much.
+Add meaningful axis labels and title to the plot.
+
+```{r}
+
+```
+
+## Plot #2
+
+Make a histogram of parity. Use varying bin sizes.
+In particular, use bins of width one centered on the 
+integers for most of the bins, and then use two wider bins
+for the largest values. Change the color of the outline of the
+bars so that they are distinct from the fill color of the bars,
+and use alpha transparency to lighten the fill color.
+
+
+
+```{r}
+
+```
+
+## Plot #3
+
+Make a plot with two overlaid density curves of birthweight, i.e.,
+nne density curve for current smokers and one for never smokers.
+Use color to differentiate the curves.
+Change the title to the legend and the labels for the colors in
+the legend to be more informative.
+
+
+```{r}
+
+```
+
+
+## Extra Plot for Extra Credit
+
+If you want to try another plot, just for fun (and to earn one point of extra credit), make a two-by-two grid  
+of four plots, one for each level of mothers education (drop the mothers with an NA value for education or those with a trade edcuation). 
+
+Make scatter plots of birthweight on mother's height and:
+
++ Jitter the points. 
++ Use color to distinguish the smokers from never smokers
++ Add regression lines for smokers and never smokers to each plot.
++ Make the points slightly transparent so it's easier to see over plotting
++ Change the x-axes scale so that the smallest observation is cut out of
+the picture.
+
+Be sure to read the information about facets at the end of the
+class notes.
+
+```{r}
+
+```
+
+## TURN IN A PDF TO GRADESCOPE

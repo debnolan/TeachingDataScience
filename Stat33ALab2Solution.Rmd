@@ -1,0 +1,132 @@
+---
+title: 'Lab #2: Three ggplot Plots'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(dplyr)
+require(ggplot2)
+```
+
+## Prepare
+
+We will use the babies data for this labn.
+
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/babies.Rda"))
+```
+
+Your task is to make 3 plots. We have provided written descriptions
+of what each plot is expected to display. Be sure to review the lecture handout for tips on how to make plots. 
+Also, you may want to 
+search online for how to make some of plots.
+
+
+Like in class, you will examine just the babies born to mothers who never smoked and mothers who smoked while pregnant. We use the `filter()` function in the `dplyr` package to select the rows.
+
+
+```{r}
+babies2 = filter(babies, smoke == "Never" | smoke == "Current")
+```
+
+
+## Plot #1
+
+Make a scatter plot of father's height against mother's height.
+Jitter the points so that they do not overlap as much.
+Add meaningful axis labels and title to the plot.
+
+```{r}
+ggplot(data=babies, mapping = aes(x = ht, y=dht)) +
+  geom_jitter() + 
+  labs(x="Mother's Height (in)", 
+         y = "Father's Height (in)",
+         title = "Scatter plot of Mothers and Fathers")
+
+```
+
+The following plot also adds a least squares line for each group
+of smoking type, colors the points according to the smoking status, and uses 
+alpha transparency to help see the overlapping points.
+
+```{r}
+ggplot(data=babies2, mapping = aes(x = ht, y=wt, color=smoke)) +
+  geom_jitter(alpha = 0.4) +
+   labs(x="Mother's Height (in)", 
+         y = "Father's Height (in)",
+         title = "Scatter plot of Mothers and Fathers") +
+  geom_smooth(method="lm", se = FALSE)
+```
+
+## Plot #2
+
+Make a histogram of parity. Use varying bin sizes.
+In particular, use bins of width one centered on the 
+integers for most of the bins, and then use two wider bins
+for the largest values. Change the color of the outline of the
+bars so that they are distinct from the fill color of the bars,
+and use alpha transparency to lighten the fill color.
+
+
+
+```{r}
+ggplot(data=babies, mapping = aes(x = parity)) +
+  geom_histogram(aes(y = ..density..),
+                 breaks = c(seq(-0.5, 7.5, by = 1), 10.5, 13.5),
+                 col = "green", fill = "grey", alpha = 0.4) +
+  labs(x = "Parity (number of previous pregnancies)")
+```
+
+## Plot #3
+
+Make a plot with two overlaid density curves of birthweight, i.e.,
+one density curve for current smokers and one for never smokers.
+Use color to differentiate the curves.
+Change the title of the legend and the labels for the colors in
+the legend to be more informative.
+
+
+```{r}
+ggplot(data=babies2, mapping = aes(x = bwt, group = smoke)) +
+  geom_density(aes(color = smoke)) +
+  scale_color_discrete(labels = c("Never Smoker", "Current Smoker")) +
+  labs(color = "Smoking\nStatus", x = "Birth Weight (ounces)")
+
+```
+
+## Extra Plot for Extra Credit
+
+If you want to try another plot, just for fun (and to earn one point of extra credit), make a two-by-two grid  
+of plots, one for each level of mothers education (drop the mothers with an NA value for education or trade edcuation). 
+
+Make scatter plots of birthweight on mother's height.
+
++ Jitter the points. 
++ Use color to distinguish the smokers from never smokers
++ Add regression lines for smokers and never smokers to each plot.
++ Make the points slightly transparent so it's easier to see over plotting
++ Change the x-axes scale so that the smallest observation is cut out of
+the picture.
+
+Be sure to read the information about facets at the end of the
+class notes.
+
+```{r}
+bp = ggplot(data = filter(babies2, !(ed == "Trade" | is.na(ed))), 
+            aes(x = ht, y = bwt, color = smoke)) +
+  geom_jitter(width = 0.5, alpha = 0.4) +
+  geom_smooth(method='lm', se = FALSE) +
+  scale_x_continuous(name = "Mother's Height (in)", 
+                     limits = c(57, 71)) +
+  scale_y_continuous(name = "Birth Weight (oz)") +
+  scale_color_discrete(labels = c("Never Smoker", "Current Smoker"))
+
+bp + facet_wrap(~ ed)
+```

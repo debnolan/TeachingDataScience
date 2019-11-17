@@ -1,0 +1,151 @@
+---
+title: 'STAT 33A Lab: R Expressions and Vectors'
+author: "YOUR NAME (YOUR SID)"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+Section: Write the time of your section  
+GSI: Write the name of your GSI
+
+### Instructions
+Write R code in the designated code chunks to answer each of the questions. As you work, you may find it helpful to be able to run your code. You can run a single line of code by pressing Ctrl + Enter. You can run an entire code chunk by clicking on the green arrow in the upper right corner of the code chunk. 
+
+Knit the document from time to time to make sure that your code runs without errors from top to bottom in a fresh R environment. 
+
+The code below controls the number of significant digits shown for the return values in your knitted document.
+
+```{r}
+options(digits = 3)
+```
+
+Begin by running the following code chunk to load the objects that you will be practicing subsetting with. This code loads the data frame called *family* into your workspace.
+
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/afamily.rda"))
+```
+
+Replace "#CODE" in the code blocks with the appropriate R expressions.
+
+### Question 1
+Convert the values in `fheight` into cm and assign the new
+measurements to `htCM`.
+
+```{r, question1}
+htCM = fheight * 2.54
+```
+
+*Check your answer*: If you did this right, you should have obtained
+numbers that are roughly: 178 163 185 170 155
+
+
+
+### Question 2
+Create a logical vector called `bigMen` that has `TRUE` for
+males who are over weight.
+
+```{r, question2}
+bigMen = (fsex == "m") & foverWt
+head(bigMen)
+```
+*Check your answer*: After creating `bigMen`,  
+the first few values in the vector should be
+TRUE FALSE FALSE FALSE.
+
+
+### Question 3
+
+The 5% trimmed mean is obtained by taking the mean of the middle 90% of the
+values (trimming off 10% of the values). 
+REad the documentation for `mean()` and use this function
+to find the 5% trimmed mean of `bmi`.
+Assign the return value from the call to `mean()` to
+`bmi.mean5`
+```{r}
+bmi.mean5 = mean(fbmi, trim = 0.05)
+bmi.mean5
+```
+
+
+### Question 4
+Create a vector called `fweight.ran` that is the sum of
+`fweight` and normal random values from a normal distribution
+with mean 0 and sd 2.
+
+```{r, question4}
+set.seed(37) #do not change this code.
+fweight.ran = fweight + rnorm(length(fweight),
+                              mean = 0, sd = 2)
+head(fweight.ran)
+```
+The first few values of `fweight.ran` should be 
+175.2 124.8 186.2 155.4  96.3
+
+### Question 5
+Investigate, coercion. 
+Run the following code and inspect the results.
+Write an explanation as to why the return values make sense.
+
+```{r, question5}
+fsex + fbmi
+foverWt * fbmi
+c(foverWt, fnames)
+c(foverWt, fsex)
+```
+WRITE YOUR EXPLANATION BELOW:
+
+1. Trying add a factor and a numeric. The underlying values in the factor don't correspond to meaningful numbers so the results are `NA`.
+
+2. foverWt is coerced to 0s and 1s in order to perform the multiplication. The result is a vector that contains bmi for those who are over weight and 0 for those who aren't.
+
+3. When concatenating a logical and a character vector, the logical is coerced to character "TRUE" and "FALSE" 
+
+4.When concatentating a logical and a factor, they are both coerced to numeric. The TRUEs become 1 and the FALSEs 0s. The factor values are converted to the numeric value for the level, 1, 2, 3, ... See below for an explicit coercion of the factor `fsex` to a numeric.
+
+```{r}
+as.numeric(fsex)
+```
+
+
+## Creating Vectors
+
+
+### Question 6
+Use `seq()` to create a vector of the even numbers between 2 and 20. Assign this to `x`
+
+```{r}
+x = seq(from = 2, to = 20, by = 2)
+x
+```
+
+### Question 7 
+Examine the pattern in the values below and create the vector `y` with these values. Do not simply use concatenation.
+3 5 9 17 33
+
+```{r}
+y = 2^(1:5) + 1
+y
+```
+
+
+### Question 8 
+Create a logical vector that is TRUE if a weight in `fweight` is within 40 pounds of 150. Call this vector `weight.150` 
+
+```{r}
+weight.150 = abs(fweight - 150) <= 40
+head(weight.150)
+```
+
+
+Once you have completed these tasks, check that you have written your name at the top of this document and that the document can be knitted.
+
+Finally, it's good practice to print the output of `sessionInfo()` so that others who want to reproduce your results know what packages and version of R you were using when you first did your analysis. 
+
+```{r, sessionInfo}
+# leave this as-is:
+sessionInfo()
+```
+
+Submit the Rmd file to bcourses. Do Not submit the knitted file.
+
