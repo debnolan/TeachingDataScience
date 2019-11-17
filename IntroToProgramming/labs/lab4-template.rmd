@@ -1,0 +1,105 @@
+---
+title: "Lab 04: Reshaping Data"
+subtitle: "STAT 33A"
+author: "<<<YOUR NAME HERE>>>"
+date: "10/11/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/toyboat.rda"))
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# Instructions
+    - If you install any packages in the Rmd file, make sure you remove the code to install them before you submit the lab. 
+    - Make sure the data is loaded via the URL prior to submitting the lab. 
+    - When replacing "<<<YOUR ANSWER HERE>>>" make sure you remove all the angle (<, >) brackets
+    - Upload a PDF of your knitted document to gradescope.
+
+# Exercise 1
+## Merging Data Sets
+
+Run this chunk below that uses the `rbind()` function. 
+```{r}
+all_sailors = rbind(sailor1, sailor2)
+all_sailors
+```
+
+
+### Are the observations/entries in the dataframe above unique?
+<<<YOUR ANSWER HERE>>>
+
+
+Create a new dataframe called `unique_sailors` that uses `sailor1` and `sailor2`, but doesn't include duplicates.
+
+```{r}
+unique_sailors = 1
+unique_sailors
+```
+There should be 5 vrows in this data frame, one each for dustin, lubber, rusty, yuppy and guppy.
+
+# Exercise 2
+## Merging Data Frames
+
+Create `reservations_with_sailors` that appends sailor's names from `unique_sailors` to the `reservations` dataframe. There should be 20 rows in the resulting data frame, the same as the number of rows in `reservations`.
+
+```{r}
+reservations_with_sailors = 1
+  
+reservations_with_sailors
+```
+
+To the `reservations_with_sailors` dataframe you created above, append the boat names.
+
+```{r}
+boats.sailors = 1
+
+boats.sailors
+```
+The resulting data frame should have 20 rows. 
+Four of these rows appear below:
+```{r, eval = FALSE}
+# sid   sname   bid day bname
+# 31	lubber	101	19	Interlake
+# 31	lubber	101	20	Interlake
+# 58	rusty	104	20	Marine
+# 58	rusty	102	21	Interlake
+```
+
+
+# Exercise 3
+## Subsetting
+
+Subset the excursions in `boats.sailors` that used a boat called "Interlake". 
+
+```{r}
+interlake = 1
+interlake
+```
+The resulting data frame should have 13 rows.
+
+
+## Exercise 4
+Create a data frame that contains the names and ids of the sailors who rented a red boat and the boat names and ids of the boats they rented.  
+
+Call this data frame `red_boat_rental`.
+This data frame should have 5 variables: `sid`, `sname`, 
+`bid`, `bname`,  and `color`. There should be one record for each sailor and boat combination.
+
+```{r}
+red_boat_rental = 1
+
+red_boat_rental
+```
+The resulting data frame should have 3 rows. One record in this data frame is
+```{r, eval = FALSE}
+# sid bid sname   bname   color 
+# 22  104 dustin  Marine  red
+```
