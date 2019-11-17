@@ -1,0 +1,155 @@
+---
+title: 'STAT 33A Lab 5: Writing Functions'
+author: "YOUR NAME (YOUR SID)"
+output:
+  pdf_document: default
+---
+
+## Introduction
+
+In this lab, we will start writing functions and explore:
+
+1. How to return a value from the function call
+2. Functions with required, default, and no arguments
+3. How to check the inputs to a functionn
+
+
+## Return value from a function call
+
+We begin with examining 2 very simple functions, `getZero1` and `getZero2`.
+
+```{r}
+getZero1 = function(x) {
+  return(0)
+}
+
+getZero2 = function(x) {
+  0
+}
+```
+
+What is the difference between these 2 functions? Call each of these functions with the following inputs, i.e., `x`, `y`, and `z`. Compare the return values.
+
+```{r}
+x = 1:5
+y = letters
+z = c("this", "is", "a", "test")
+
+getZero1(x)
+getZero1(y)
+getZero1(z)
+getZero2(x)
+getZero2(y)
+getZero2(z)
+```
+
+In `getZero2` there is no explicit return statement so the function returns the result of the last performed evaluation. Therefore the outputs of these two functions are identical.
+
+## A function with no arguments
+
+Q1. Write a new function `getZero3` which takes no arguments and returns the same value as `getZero1`.
+
+```{r}
+getZero3 = function() {
+  0
+}
+```
+
+Test your function.
+
+```{r, error = TRUE}
+getZero3()
+```
+
+## A function with multiple arguments
+
+Q2. Now write a function called `getNumPower` that takes a numeric vector and returns a vector of the same length where each element is a square of the corresponding element of the input vector. Call the input argument `x` and make it a required argument.
+
+```{r}
+getNumPower = function(x) {
+  x^2
+}
+```
+
+Test your function with the following calls.
+
+```{r, error = TRUE}
+getNumPower(1:5)
+getNumPower(integer(0))
+getNumPower(-20)
+```
+
+Note that the input can be a vector of length 1 or 0.
+
+Q3. Modify your function to take a second argument, called `power`, and use this argument to raise the values in `x` to the provided power. Provide a default value to `power` so that it returns the same results as the previous version of the function when the `power` argument is not supplied.
+
+```{r}
+getNumPower = function(x, power = 2) {
+  x^power
+}
+```
+
+Note that we can supply a vector for `power` so each element in `x` is raised to a different power. Convince yourself that this is the case by examining the return values from the following calls.
+
+```{r, error = TRUE}
+getNumPower(x = x)
+getNumPower(x = 1:6, power = rep(0:1, each = 3))
+getNumPower(x = 1:6, power = 1:3)
+```
+
+Notice that in the call `getNumPower(x = 1:6, power = 1:3)` the input for `x` is a vector of length 6 and the input for `power` is of length 3. What did our function return? Can you reason out why?
+
+Try the following call. Notice it issues a warning. Why? Does it still return a value? Can you figure out what `R` is doing here?
+
+```{r, error = TRUE}
+getNumPower(x = x, power = 1:4)
+```
+
+These function calls show how the recycling rule works in `R` when operations are performed on two vectors that have different lengths.
+
+## Practical functions
+Write a function called `tip_calc` that will help you calculate the appropriate tip to leave when you eat out at a restaurant. It should take the following arguments: `wo_tax` (pre-tax total), `tip_perc`(percent tip). 
+The function can assume that the value for tip_perc is a fraction, e.g.,
+0.18 to leave an 18% tip.
+
+
+```{r}
+tip_calc = function(wo_tax, tip_perc) {
+  wo_tax * tip_perc
+}
+```
+
+```{r}
+tip_calc(15, 0.15)    # This should output 2.25.
+```
+
+
+Create a new function called `predict_grade` that will help you predict what percent you need on your final exam to have a certain overall grade in the course. Remember [RogerHub](https://rogerhub.com/final-grade-calculator/)? 
+$$\frac{d - c(1 - w)}{w}$$
+
+  + c = Current overall grade in class, excluding undetermined categories
+  + d = Desired minimum overall grade in class
+  + w = Weight of the final exam category
+
+
+
+Your function should take three arguments (similar to RogerHub): 
+
++ current = your current grade (a score between 0 and 100)
++ desired = the grade you want in the course (a score between 0 and 100),
++ weight = the weight of the final exam category (a fraction), e.g., 0.10 if the final is 10% of the grade. 
+
+All of these parameters are required.
+
+
+```{r}
+predict_grade = function(current, desired, weight) {
+  
+  (desired - current*(1 - weight))/weight
+}
+```
+
+```{r}
+predict_grade(92.4, 90, .10)    # Test this outputs 68.4
+predict_grade(88, 90, 0.15)     # Returns 101.33
+```

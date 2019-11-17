@@ -1,0 +1,129 @@
+---
+title: 'STAT 33A Lab 7: Creating checkGran() function from HW6'
+author: "YOUR NAME (YOUR SID)"
+output:
+   pdf_document: default
+---
+
+## Working with `duplicated()`
+
+In this lab, we will work with `duplicated()` and `unique()` and `which()`, which will help us with HW6.
+
+The R function `duplicated()` returns a logical vector where TRUE specifies which elements of a vector or dataframe are duplicates.
+```{r,error = TRUE}
+duplicated(c(1,2,3,4,1,2,3,4))
+```
+
+Next we use duplicated with a dataframe.
+Run the following code to create a dataframe called `df`.  
+Examine `df` to determine if it has any duplicate rows. 
+```{r}
+df = data.frame(column1 = c(1, 1, 2,2), column2 = c("x","x","y","z"), column3 = c("a","a","b","b"))
+df
+```
+Here, row 2 is a duplicate of row 1.
+The duplicated function checks the entire row for duplicates and returns a logical vector the same length as the number of rows in the dataframe.
+```{r}
+duplicated(df)
+```
+
+When we sum the results from the call to `duplicated()`, we get 1 as there is only 1 duplicate row.
+```{r}
+sum(duplicated(df))
+```
+Now that we know that the data has one duplicate row, we might use the `which()` function to figure out which row in the data frame is the duplicate. 
+
+## Working with `which()`
+
+The which function takes the input of logical vector and returns the indices where it's TRUE.
+
+```{r}
+which(c(FALSE,FALSE,TRUE,TRUE))
+```
+
+Use `which()`, to figure out which of the rows in `df` is the duplicate.
+```{r}
+
+```
+The answer should be 2 as only the second row is duplicate in our dataframe. 
+(We don't count the first row as a duplicate because it is the first occurrence
+of the values: 1, "x", "a")
+
+## Creating `checkGran()`
+
+Use all that we have learnt about these functions to write the checkGran() function.
+
+Step1: Create a function named `checkGran()` which has arguments `key` and `dups`, and where `dups` has a default value of FALSE.
+```{r}
+checkGran=function(){
+  
+}
+```
+
+Step 2: In the function, calculate number of rows in `key` and assign it to a variable `num`. 
+Create another variable `dup_location` which returns a boolean vector indicating whether each row in `key` is duplicate or not.
+```{r}
+checkGran=function(){
+  num=1
+  dup_location=1
+}
+```
+
+Step 3: Now, use the logical vector `dup_location` and count the number of unique records and assign it to the new variable `uniq`. Please note that the values in `dup_location` are TRUE if the element is a duplicate record and FALSE if it's not a duplicate.
+```{r}
+checkGran=function(){
+  num=1
+  dup_location=1
+  uniq=1
+}
+```
+
+Step 4. Create a vector `info` containing `num` and `uniq`.
+```{r}
+checkGran=function(){
+  #num=1
+  #dup_location=1
+  #uniq=1
+  info=c(num=num, uniq=uniq)
+}
+```
+
+Write an if statement which updates `info` by including the indices of duplicate elements in the dataframe, if the argument `dups` is TRUE.
+
+```{r}
+checkGran=function(){
+  num=1 #number of rows in keys
+  dup_location=1
+  uniq=1 #number of unique rows in keys
+  info=c(num=num, uniq=uniq)
+  if(dups){
+    #add to the info vector the indices of duplicate rows
+  }
+}
+```
+
+Step 5. Lastly, write an explicit return statement at the end of your function to return `info`.
+```{r}
+checkGran=function(){
+  num=1 #number of rows in keys
+  dup_location=1
+  uniq=1 #number of unique rows in keys
+  info=c(num=num, uniq=uniq)
+  if(dups){
+    #add to the info vector the indices of duplicate rows
+  }
+  #Your return statement goes here
+}
+```
+
+Please note - This is one way of writing your `checkGran()` function. There are other approaches to writing it that are also correct.
+
+HW 6 has some additional checks for your function.
+
+
+
+
+  
+
+
+

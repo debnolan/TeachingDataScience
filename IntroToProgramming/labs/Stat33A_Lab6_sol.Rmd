@@ -1,0 +1,163 @@
+---
+title: 'STAT 33A Lab 6: If Else statements'
+author: "YOUR NAME (YOUR SID)"
+output:
+   pdf_document: default
+---
+
+## Introduction
+
+In this lab, we will focus on writing if-else statements. These statements are used to perform a computation based on a condition. 
+  
+The syntax for an if-else statement is as follows:
+  
+```{r,error = TRUE,eval=FALSE}
+if (condition) {
+    Expr1 
+} else {
+    Expr2
+}
+```
+
+We will use if-else statements to improve the functions we wrote last week in lab and HW.
+  
+  
+### Question 1
+
+Consider the function to calculate tips in a restaurant which we wrote in lab last week.
+```{r}
+tip_calc = function(wo_tax, tip_perc){
+  wo_tax * tip_perc
+}
+```
+
+Suppose you don't want to tip more than 100 dollars. Modify the above function to include an if-else condition to check if the calculated tip is over 100 dollars. Return 100 if the tip is more than 100 dollars, otherwise return the calculated tip amount. Call the revised function `tip_calc_new()`
+```{r}
+tip_calc_new = function(wo_tax,tip_perc){
+ tip = wo_tax*tip_perc
+ if (tip > 100)
+   return(100)
+ else 
+   return(tip)
+}
+```
+
+Testing the function - ( The value should be 100)
+```{r}
+tip_calc_new(100000,0.2)
+```
+
+
+### Question 2
+
+Let's now look at the `predict_grade` function that helps predict what percentage you need on your final exam to have a certain overall grade in the course.
+ 
+Here's the function -
+
++ current = your current grade (a score between 0 and 100)
++ desired = the grade you want in the course (a score between 0 and 100),
++ weight = the weight of the final exam category (a fraction), e.g., 0.10 if the final is 10% of the grade.
+
+```{r}
+predict_grade = function(current, desired, weight){
+  (desired - current*(1 - weight))/weight
+}
+
+```
+
+Insert a condition to check if the weight entered is between 0 and 1. If it does not satisfy this condition, use stop() and give a message indicating that the weight should be a fraction and should be between 0 and 1. Note that it
+is not necessary to write an else statement here. (Call the revised function `predict_grade_new()1)
+```{r}
+predict_grade_new = function(current, desired, weight){
+  if(weight < 0 | weight > 1){
+    stop('check weight: It needs to be a fraction between 0 and 1')
+  }
+  (desired-current*(1-weight))/weight
+}
+
+```
+
+Check your function -
+```{r error = TRUE}
+predict_grade_new(98, 25, 4)
+```
+The output should be an error with a helpful message.
+
+Check your function works as originally intended -
+```{r}
+predict_grade(92.4, 90, .10) # Test this outputs 68.4
+```
+
+ 
+## Question 3
+
+In class, we calculated the BMI from height and weight. Modify the function to allow the caller to specify whether the height is measured in inches, feet, centimeters, or meters. To do this:
+
++ Add an argument to the function's signature called `unit`. Give `unit` a default value of "in", and allow values to be "in", "ft", "cm", "m".
++ Add a check to your function, where if `unit` has a value other than one of these 4, issue a warning, and set `unit` to "in"
++ Use nested if-else statments to perform the calculation
+
+A simplification of the bmi calculation:
+$$bmi = \frac{c \times wt}{ht^2}$$
+where $c = 1$ for m and kg, $c = 10000$ for cm and kg,
+$c = 703$ for in and lb, and $c = 4.882$ for fit and lb.
+
+```{r}
+bmi_unit = function(ht, wt, unit = "in"){
+  if ((!unit %in% c("in", "ft", "cm", "m"))) {
+    warning("unit value not valid. using inches")
+    unit = "in"
+  }
+  c = 1
+  if (unit == "in") { 
+    c = 703
+    } else if (unit == "ft") {
+      c = 4.882
+    } else if (unit == "cm") {
+      c = 10000
+    }
+  
+    return(c*wt/ht^2)
+  }
+```
+Testing the function. 
+The following five calls to `bmi_unit()` should all return (roughly)
+the same values: `[1] 19.52 22.59 27.12`
+```{r}
+ht = c(60, 66, 72)
+wt = c(100, 140, 200)
+bmi_unit(ht, wt)
+
+ht2 = c(5, 5.5, 6)
+bmi_unit(ht2, wt, unit = "ft")
+
+ht3 = c(152.40, 167.64, 182.88)
+wt3 = c(45.35920, 63.50288, 90.71840)
+bmi_unit(ht3, wt3, unit = "cm")
+
+ht4 = c(1.5240, 1.6764, 1.8288)
+bmi_unit(ht4, wt3, unit = "m")
+
+bmi_unit(ht, wt, unit ="z")
+```
+ 
+## Question 4
+ 
+Write a function to check if numbers in a vector are odd or even.
+Use ifelse to return a vector the same length as the input that
+contains "odd"s and "even"s, according to whether each entry is odd or even.
+
+Hint - Use the %% operator to get remainder when divided by 2
+```{r}
+odd_even = function(x){
+  ifelse(x%%2 == 0, "even", "odd")
+}
+``` 
+
+Test your function with the code below.
+```{r}
+odd_even(c(3, 0, -2, 1, 5)) #returns odd, even, even, odd, odd
+```
+ 
+ 
+ 
