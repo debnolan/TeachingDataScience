@@ -1,0 +1,211 @@
+---
+title: 'EDA: Bike Sharing and the Weather'
+author: "A Solution"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r, collapse=TRUE}
+require(readr)
+require(ggplot2)
+require(tidyr)
+require(dplyr)
+```
+
+
+KNIT TO PDF AND UPLOAD YOUR PDF TO GRADESCOPE *AND* UPLOAD THE RMD FILE TO BCOURSES.
+
+
+
+## Introduction
+
+We will continue to work with the bike riding data frame for this home work.
+Recall, that for the `bike` data frame, 
+each record represents one hour of a day in 2011-2012.
+
+  - instant : integer representing hour and day as an integer
+  - season : season (1:spring, 2:summer, 3:fall, 4:winter)
+  - yr : year (0: 2011, 1:2012)
+  - mnth : month ( 1 to 12)
+  - hr : hour (0 to 23)
+  - holiday : whether day is holiday or not
+  - weekday : day of the week
+  - workingday : if day is neither weekend nor holiday
+  - weathersit : 
+      - 1: Clear or partly cloudy 
+      - 2: Mist + clouds
+      - 3: Light Snow or Rain
+      - 4: Heavy Rain or Snow
+  - temp : Normalized temperature in Celsius (divided by 41)
+  - atemp: Normalized feeling temperature in Celsius (divided by 50)
+  - hum: Normalized percent humidity (divided by 100)
+  - windspeed: Normalized wind speed (divided by 67)
+  - casual: count of casual users
+  - registered: count of registered users
+  - cnt: count of total rental bikes including casual and registered
+  - newDate : the data in a special date format
+  
+
+
+Load the RDA file in to your R session.
+```{r}
+load(url("https://www.stat.berkeley.edu/~nolan/Pretoria/data/bikeshare.rda"))
+```
+
+
+## Creaing new variables
+
+When we analyze data, we some times come up with ideas that lead to 
+the creation of new variables. For example, we can combine two variables into one,
+or we can turn a numeric variable into a factor.
+
+You will do both. 
+
+### Proportion of Casual Riders
+
+Suppose that we want to examine the proportion of casual riders rather than the counts of casual riders. 
+
++ Create a new variable called `propCasual` that is the proportion of casual riders among total riders in an hour. 
+
++ Add this variable to the data frame `bike`.  
+
+```{r}
+bike$propCasual = 1
+```
+
+Examine the distribution of `propCasual` by making a histogram of it.
+And, overlay a density curve on the histogram.
+```{r}
+
+
+```
+
+### Discretizing Temperature
+
+The variable `temp` is a normalized value of temperature in Celsius (divided by 41).
+Re-scale `temp` so that it is in Celsius. (And replace the original `temp` with this new version).
+
+```{r}
+bike$temp = 1
+max(bike$temp)
+```
+The maximum value for `temp` should be 41.
+
+
+Examine the distribution of `temp` by making a histogram. (No need to add labels to this plot).
+```{r}
+
+```
+
+
+At times, we want to turn a continuous numeric variable, such as `temp` into 
+a categorical variable. This is especially common with variables such as income and age, where a person's income and age are reported in brackets for privacy.
+
+We can use one of the `cut()` function to create the categories.
+The `cut()` function divides a range into intervals, where the endpoints of
+the intervals can be specified with the `breaks` argument.   
+The return value is a factor vector that provides the interval to which each value of the input vector `x` belongs.
+
+Sometimes, we divide the intervals so that the same percentage of observations are in each interval. Instead we will divide the range from 0 to 40 as follows:
+
+[0, 5) [5, 10) [10, 12) [12, 14) ... [28, 30) [30, 35) [35, 40)
+
+Create a new vector, called `temp.d` that is a discretized version of `temp` that uses the above categories.
+
+```{r}
+temp.d = 1
+```
+There should be 193 records in the first bin (from 0 to 5) and 356 in the last bin
+(from 35 to 40).
+
+Use the `table()` function to examine the counts of observations in `temp.d`.
+Use the `is.na()` and `sum()` functions to check how many NAs are in `temp.d`
+
+```{r}
+table(temp.d)
+sum(is.na(temp.d))
+```
+You should find that there are 2 NAs in `temp.d`.
+
+Lastly, add `temp.d` to the `bike` data frame.
+```{r}
+bike$temp.d = temp.d
+length(bike)
+```
+There should now be 20 vectors in `bike`.
+
+### Dropping Records
+
+Recall that the variable `weathersit` takes on four values:
+ 
++ 1: Clear or partly cloudy 
++ 2: Mist + clouds
++ 3: Light Snow or Rain
++ 4: Heavy Rain or Snow
+
+Use `table()` to examine the counts for these four types of weather.
+```{r}
+
+```
+You should find that there are only 3 records that have a value of `Heavy` for the weather. 
+
+Are there any NAs in `weathersit`?
+```{r}
+
+```
+You should find that there are no NAs. 
+
+We will not be able to do much with the Heavy category for weather, so let's delete these records along with any records that have NA values for `propCasual` or 
+`temp.d`.  Use `filter()` to do this, and reassign the data frame back to `bike`.
+
+```{r}
+bike = filter(bike, TRUE)
+nrow(bike)
+```
+The bike data frame should now have 17374 rows (it originally had 17379).
+
+Now that we have prepared the data, we are ready to examine the relationship between the proportion of riders who are casual riders and the weather.
+
+
+## Weather Plot #1
+
+Plot smooth curves of `propCasual` by `temp`; that is, show the local average proportion of casual ridership for each temperature. 
+Make separate curves according to the day of the week. 
+Use the `geo_smooth()` layer to average the propCasual values for each temperature value. We have set up the smoothing layer for you so that it uses cubic splines
+for the curves. Be sure to label the axes of the plot. Once  the plot works, remove  `eval=FALSE` from the r chunk.
+
+```{r, eval=FALSE}
+ggplot(data = bike, aes(FILL IN AND REMOVE EVAL = FALSE IN THE {} ABOVE)) +
+  geom_smooth( method = lm, formula = y ~ splines::bs(x, 3), se = FALSE) +
+  labs(x = " ",
+       y = " ")
+```
+As temperature increases, there is a roughly linear increase in the proportion of casual riders. The weekends have higher proportions of casual riders in the warmer temperatures.
+
+  
+
+## Weather Plot #2
+
+Make another plot that examines the relationship between weather and rider counts. 
+This time, make smooth curves to examine the relationship between the proportion of casual riders and the date (`newDate`). There should be one curve for each type of
+weather. Be sure to label the axes.
+
+
+```{r}
+
+```
+
+These 3 smooth curves show the changes in proportion of casual riders for clear, misty, and light precipitation days throughout the year. The curves rise and fall together with clear and misty days being close to each other with misty typically below clear, and the light rain/snow days are consistently below the other 2 types of days.  We also see the proportion of casual riders increase in the summer months. This proportion appears larger in 2011 than 2012. This may be due to the program gaining ridership among the registered users from 2011 to 2012.
+
+## Weather Plot #3
+
+Make box plots of `propCasual` for the 14 discretized temperature groups.
+Label the axes of the plot.
+
+```{r}
+
+```
+
+This set of box plots show a flattening of the proportion in warm weather.
