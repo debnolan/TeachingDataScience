@@ -1,0 +1,254 @@
+---
+title: "Reshaping Data"
+author: "lab template"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r, collapse=TRUE}
+require(readr)
+require(ggplot2)
+require(tidyr)
+require(dplyr)
+```
+
+
+## Introduction
+
+Load the Rda file in to your R session.
+It contains the dataframe called `bike' which holds counts of riders at the hourly level.
+
+```{r}
+load(url("https://www.stat.berkeley.edu/~nolan/Pretoria/data/bikeshare.rda"))
+```
+
+  
+### 'bike'
+
+Each record represents one hour of a day in 2011-2012.
+
+  - instant : integer representing hour and day as an integer
+  - season : season (1:spring, 2:summer, 3:fall, 4:winter)
+  - yr : year (0: 2011, 1:2012)
+  - mnth : month ( 1 to 12)
+  - hr : hour (0 to 23)
+  - holiday : whether day is holiday or not
+  - weekday : day of the week
+  - workingday : if day is neither weekend nor holiday
+  - weathersit : 
+      - 1: Clear or partly cloudy 
+      - 2: Mist + clouds
+      - 3: Light Snow or Rain
+      - 4: Heavy Rain or Snow
+  - temp : Normalized temperature in Celsius (divided by 41)
+  - atemp: Normalized feeling temperature in Celsius (divided by 50)
+  - hum: Normalized percent humidity (divided by 100)
+  - windspeed: Normalized wind speed (divided by 67)
+  - casual: count of casual users
+  - registered: count of registered users
+  - cnt: count of total rental bikes including casual and registered
+  - newDate : the data in a special date format
+  
+
+
+## Filter Rows and Select Columns
+
+Let's work with a subset of the data:
+
++ records from one year (2012)
++ columns registered, casual, working day, week day, hour, month, and the new date
+
+Call this new data frame bike12.
+
+First let's reduce the columns, and reassign to itself.
+We use `select()` to reduce the columns. 
+
+```{r}
+keepVars = c("yr", "registered", "casual", "workingday", 
+             "weekday", "hr", "mnth", "newDate")
+bike = select(bike, keepVars)
+
+names(bike)
+```
+
+Note that we kept `yr` because we will need it for the next step.
+
+Before we take the subset of rows, let's find the counts so we can do a before-after comparison to check our work.
+
+```{r}
+table(bike$yr)
+```
+
+Now let's take the subset.
+
+```{r}
+bike12 = filter(bike, yr == 1)
+
+nrow(bike12)
+```
+
+We have the correct number of rows. We do not have the correct columns.
+We do not want `yr`. We can use `select()` to drop it.
+
+
+```{r}
+bike12 = select(bike12, -"yr")
+
+names(bike12)
+```
+
+This is an unusual way to deselect a column; we used a negative sign on 
+a character vector.
+
+Let's make a plot to celebrate:
+
+```{r}
+ggplot(data = bike12, aes(x = hr, y = casual)) +
+  geom_smooth() +
+  geom_smooth(aes(y = registered), color = "green") +
+  labs(x = "Hour of Day", y = "Number of Riders")
+```
+
+
+## Gather the registered and casual counts
+
+Recall, that we would rather make these plots with a stacked dtata frame.
+This is because `registered` and `casual` both have the same information in them.
+They both contain hourly counts. The difference is that one contains 
+counts for registered riders and the other holds counts for casual riders. 
+
+We can use `gather()` to create a new vector called `counts` that contains 
+hourly counts for both kinds of riders. At the same time, we need to create
+a new variable, `rider` which contains the information as to the type of rider the
+count pertains. The `rider` vector is a factor that has two levels: 
+casual and registered. 
+
+
+We make this data frame as follows
+
+```{r}
+bikeStack =  gather(bike12, "rider", "counts", casual, registered)
+```
+
+Let's examine `bikeStack`. 
+
++ It should have twice the number of records as `bike12`. 
++ There should be an equal number of registered and casual values in `rider`.
++ A variable, such as `hr`, should have twice the number of records for each hour as in `bike12.
+
+We check these with:
+
+```{r}
+2 * nrow(bike12)  == nrow(bikeStack)
+
+table(bikeStack$rider)
+
+all(table(bike12$hr) * 2 == table(bikeStack$hr))
+```
+
+
+Let's remake the plot above, using this new data frame.
+`geom_smooth()` to smooth the counts over hour of the day.
+Produce comparisons of the casual and registered riders.
+
+```{r}
+ggplot(data = bikeStack, aes(x = hr, y = counts, color = rider)) +
+  geom_smooth() +
+  labs(x = "Hour of Day", y = "Number of Riders")
+```
+
+## Group the hourly data to daily data
+
+Suppose we want to examine the data after it has been aggregated to the 
+daily counts. We work with `bikeStack`.
+
+What do we group by?
+
++ hour
++ date
++ rider type
++ hour and date
++ hour and rider type
++ rider type and date
+
+### Obtaining the date
+
+Before we group the data, we have an issue that needs addressing.
+The dates include the hour of the day. We just want the date so that 
+we can use it as a grouping variable.
+Working with dates can be tricky. We use the `lubridate` package,
+which has a function `yday()` which returns an integer for the calendar 
+day of the year.
+```{r}
+require(lubridate)
+bikeStack = mutate(bikeStack, day.yr = yday(newDate))
+```
+
+Let's see how well we did:
+```{r}
+head(table(bikeStack$day.yr), 12)
+```
+
+Does this make sense? Should we have 48 records? Why?
+
+Let's table the table to see for how many days do we have 48 records.
+
+```{r}
+table(table(bikeStack$day.yr))
+```
+
+What shall we do with these data?
+Let's drop the days with fewer than 44 records. Just not yet!
+
+### Grouping by date and rider
+
+```{r}
+bs.gdr = group_by(bikeStack, day.yr, rider)
+```
+
+
+Next we create the variables of interest from the groups:
+
++ sum the `counts` for each day
++ keep  `weekday`, `workingday`, and `mnth` (these should have the same values within a group)
++ drop `newDate` and `hr`
+
+
+```{r}
+bike_day = summarise(bs.gdr, daily = sum(counts), 
+                     records = n(), 
+                     mnth = first(mnth), 
+                     weekday = first(weekday), 
+                     workingday = first(workingday))
+```
+
+If we want to keep these other variables we must include them in the `summarize()` call. We are simply taking the first value in each group. The values in a group
+should all be the same.
+
+Now we also have the number of records in each group so that we can filter out the weird months.
+
+```{r}
+bike_day = filter(bike_day, records > 20)
+```
+
+
+Let's make a plot to celebrate!
+
+```{r}
+ggplot(data = bike_day, 
+       aes(x = factor(mnth), y = daily, color = rider)) +
+  geom_boxplot() +
+  labs(x = "Month", y = "Daily Ridership", title = "2012",
+       color = "Rider\nType")
+```
+
+
+```{r}
+ggplot(data = bike_day, 
+       aes(x = factor(weekday), y = daily, color = rider)) +
+  geom_boxplot() +
+  labs(x = "Day of Week", y = "Daily Ridership", title = "2012",
+       color = "Rider\nType")
+```
+

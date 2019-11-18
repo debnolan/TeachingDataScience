@@ -1,0 +1,247 @@
+---
+title: 'EDA: Bike Sharing'
+author: "A Solution"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r, collapse=TRUE}
+require(readr)
+require(ggplot2)
+require(tidyr)
+require(dplyr)
+```
+
+## Introduction
+
+Load the Rda file in to your R session.
+It contains two dataframes. The one called `bike' is at the hourly level and the one called `bike_day' is aggregated to the daily level. 
+These dataframes contain all of the new and derived variables from the earlier section.
+
+```{r}
+# switch FALSE to TRUE in the eval argument to the code chunk
+# to load the R data frame.
+
+load(url("https://www.stat.berkeley.edu/users/nolan/Pretoria/data/bikeshare.rda"))
+```
+
+
+### `bike_day`
+
+This data frame contains daily statistics. In particular, we are interested
+in the number of daily registered and unregistered riders.
+
+
+```{r}
+dim(bike_day)
+names(bike_day)
+sapply(bike_day, class)
+```
+
+```{r}
+table(bike_day$weekday)
+table(bike_day$workingday)
+table(bike_day$holiday)
+table(bike_day$season)
+table(bike_day$mnth)
+```
+
+```{r}
+summary(bike_day)
+```
+
+The variables in the 'bike_day' data frame are defined as:
+
+* `registered`: total number of registered riders for each day
+* `casual`: total number of casual riders for each day
+* `weekday`: day of the week (Sun, Mon, ...) 
+* `workingday`: whether that day is a working day or not (yes, no)
+* `holiday`: whether that day is a holiday or not (yes, no)
+* `season`: season (spring, summer, fall, winter)
+* `mnth`: month
+* `temp`: average hourly temperature for the day
+
+
+  
+### `bike`
+
+The granularity of this data frame is at the hourly level.
+Each record represents one hour of a day in 2011-2012.
+
+  - instant : integer representing hour and day as an integer
+  - season : season (1:spring, 2:summer, 3:fall, 4:winter)
+  - yr : year (0: 2011, 1:2012)
+  - mnth : month ( 1 to 12)
+  - hr : hour (0 to 23)
+  - holiday : whether day is holiday or not
+  - weekday : day of the week
+  - workingday : if day is neither weekend nor holiday
+  - weathersit : 
+      - 1: Clear or partly cloudy 
+      - 2: Mist + clouds
+      - 3: Light Snow or Rain
+      - 4: Heavy Rain or Snow
+  - temp : Normalized temperature in Celsius (divided by 41)
+  - atemp: Normalized feeling temperature in Celsius (divided by 50)
+  - hum: Normalized percent humidity (divided by 100)
+  - windspeed: Normalized wind speed (divided by 67)
+  - casual: count of casual users
+  - registered: count of registered users
+  - cnt: count of total rental bikes including casual and registered
+  - nweDate : the data in a special date format
+  
+
+
+## Compare the Distribution of Casual and Registered Riders
+
+Make density plots of these two types of riders.
+
+
+```{r myExploreRiderCounts1}
+pCasual = ggplot(data = bike, aes(x = casual, y = ..density..)) +
+  geom_density(bw = 5, col = "red") + 
+  labs(x = "Hourly Count of Riders")
+
+pCasual + geom_density(aes(x = registered, y = ..density..),
+                       bw = 5, col = "blue")  
+```
+
+
+We didn't need to assight the `ggplot()` object. Instead we can simply 
+call `ggplot()` and add two layers, one for each group of bike riders.
+Note that we can specify only the data frame in the call to `ggplot()`,
+and then use aesthetic mappings in each layer.
+
+```{r}
+ggplot(data = bike) +
+  geom_density(mapping = aes(x = casual, y = ..density..),
+               bw = 5, col = "red") + 
+  labs(x = "Hourly Count of Riders") +
+  geom_density(mapping = aes(x = registered, y = ..density..),
+                       bw = 5, col = "blue")  
+```
+
+
+*The distribution of hourly counts of casual riders has a sharp peak near 0, and is skew right with a long right tail. The distribution of registered riders also has a peak at 0, though much less sharp. The distribution has a large shoulder from about 50 to 250, which could be a second mode.*
+
+
+The density plots do not show us how the counts for registered and casual riders vary together. To see this relationship, we can make a scatter plot.
+Notice that we need to convert the `season` variable to a factor so that we 
+get 4 different colors, instead of colors along a continuous scale.
+Also, not that the color aesthetic mapping in the call to `ggplot()` is not used,
+but the legend title incorrectly identifies the legend as colors for working day,
+not season. Not sure why this is happening.
+
+```{r myExploreRiderCounts2}
+# Relationship between casual and registered riders
+ggplot(data = bike, aes(x = casual, y = registered,
+                        color = workingday)) +
+  geom_point(aes(color = factor(season)), 
+             size = 0.4, alpha = 0.1) +
+  labs(x = "Casual Riders (hourly counts)",
+       y = "Registered Riders (hourly counts)")
+```
+
+*This scatter plot of counts of the 2 types of riders has points color coded according to whether or not the day is a weekday. We see that there are two distinct elliptical shapes, one for week days and one for week ends. On the weekends, the casual and registered riders have a roughly linear relationships. On the other hand, during the work week, there appears to be no relationship between these counts. The numbers of casual riders in an hour fall between 0 and 100, and for any given count of casual riders, the registered riders ranges from about 0 to 750, regardless.* 
+
+
+Given the overplotting, it is difficult to discern the relationships because for example, we can't see if ther might be green/blue points that have been overplotted by the pinkish ones and vice versa.
+
+
+
+## Changing the Shape of the Data Frame
+
+Make boxplots of the number of riders according to month, with separate boxes
+for the casual and registered riders.
+
+To make this plot, it is easiest to stack the counts and create a new variable for the type of rider. The `gather' function in the `dplyr' package is particularly convenient for this purpose. Call the new variables `rider` and `count`. 
+
+```{r}
+bikeStack =  gather(bike, "rider", "count", 
+                    casual, registered)
+tail(bikeStack)
+```
+
+Use this data frame to make the time series plot.
+
+What is the aesthetic mapping?
+
++ x to month
++ y to count (number of riders)
++ fill to rider (factor whether casual or registered)
+
+```{r}
+
+ggplot(data = bikeStack) +
+  geom_boxplot(aes(x = factor(mnth), y = count, fill = rider)) +
+  labs(x = "Month", y = "Number of Riders")
+```
+
+Put the y axis on log scale. 
+We add 1 to all of the values so that counts of 0 do not create errors.
+
+Note that the color aesthetic refers to the boundary of the boxes,
+and the fill aesthetic refers to the color that fills the boxes.
+
+```{r myRideTimePlot1}
+ggplot(data = bikeStack) +
+  geom_boxplot(aes(x = factor(mnth), y = 1 + count, color = rider, fill = rider)) +
+  scale_y_log10() + labs(x = "Month", y = "Number of Riders")
+```
+
+*These monthly side-by-side boxplots for casual and registered riders shows a greater difference in counts of casual riders in the spring-fall months in comparison to the winter months than for the registered riders.*
+
+
+Make a time series plot that examines the relationship between time and rider counts. 
+
+Make another time related plot.
+
++ Use *newDate* to make a line plot for the number of riders 
++ Plot only data for June 2011. 
++ Make separate lines for the two types of riders 
+
+
+```{r rideTime}
+
+
+ggplot(data = filter(bikeStack, mnth == 6 & yr == 0)) +
+  geom_line(aes(x = newDate, y = count, color = rider)) +
+  labs(x = "Date", y = "Number of Riders")
+```
+
+This plot has several interesting features. How do the number of casual and registered riders compare for different times of day and days of the week? 
+
+*We can see several things in this line plot. We see daily patterns in rentals, with the weekends having far fewer registered users and more casual riders. The number of casual riders is always less than the number of registerred riders, but on the weekend, the counts are much closer together. We can also see 3 peaks in the registered riders daily weekday schedule. These look to be in the morning, mid-day, and evening.*
+
+
+### Creating variables to plot on the fly
+
+Make another plot that examines the relationship between weather and rider counts. Explain what additional insights your plot provides. 
+
+Make a boxplot of the proportion of riders who are casual, against the
+temperature.
+
+Prepare `bike` as follows to make this plot:
+
++ Drop the `Heavy` weather records.
++ Turn temperature into a categorical variable
++ Create a new variable that is the proportion of casual riders among total riders in an hour.
+
+We can make all of these within the call to `ggplot()` and layers.
+That way, the changes all disappear after the plot is made.
+
+Notice that we use the `cut_width()` function to discretize temperature and create a factor from it.
+
+Notice that we create the proportion of casual riders from `casual/(casual + registered)`. 
+
+```{r}
+ggplot(data = filter(bike, weathersit != "Heavey")) +
+  geom_boxplot(aes(x = (40*temp), 
+                   y = casual/(casual + registered),
+                   group = cut_width((40*temp), 2))) +
+  labs(x = "Temperature (degrees C)",
+       y = "Proportion of Casual Riders")
+```
+
+*This set of boxplots show a flattening of the proportion in warm weather.*

@@ -1,0 +1,236 @@
+---
+title: "Getting Started with R"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+## Expressions in R
+
+There are 2 basic kinds of expressions:
+
+* Arithmetic
+
+```{r}
+2 + 3
+```
+
+* Function-style (aka Call Expressions)
+
+```{r}
+sample(7)
+```
+
+Function-style can have a side effect, such as making a plot
+
+```{r}
+plot(pressure)
+```
+
+R has may built-in functions. Some are arithmetic functions, such as `sqrt`,
+`log`, and `sin`.  Others perform statistical computations, such as `mean`,
+`median`, `sd`, and `range`.
+
+## Order of Operation
+
+Arithmetic Expressions follow the typical order of operations:
+What is the return value of the following expression?
+```{r, eval=FALSE}
+3 + 2 * 6 / 3 * (1 + 3)
+```
+
+1. 4
+2. 10
+3. 19
+4. 40
+5. None of the above
+
+Go To
+https://bit.ly/33Te04K 
+to answer 
+
+## Read - Evaluate - Print - Loop (REPL)
+
+R is an interactive language. It enables exploratory data analysis. 
+We type an expression at the prompt and hit the return / enter key. 
+Then R **Reads** this expression, **Evaluates** it (performs a computation), and **Prints** the return value at the console.  
+It is then ready for another expression, i.e., another **Loop**.
+
+
+## Assignment
+
+As just mentioned, when we evaluate an expression, R prints the results to the console as output.
+
+```{r}
+10 ^ (15 / 3 - 2)
+```
+
+If we want to save the return value to use in another calculation, we assign
+it to a **variable**. For example,
+
+```{r}
+x = 10 ^ (15 / 3 - 2)
+```
+
+Now, when we run this code, nothing is printed to the console. However, the variable `x` contains the value `1000`.  If we want to confirm this, we can type `x` at the prompt and the value is printed at the console.
+
+```{r}
+x
+```
+
+We can also use `x` in another computation, e.g.,
+
+```{r}
+sqrt(x)
+```
+
+Variables have a **name** and a **value**.
+To access the value we use the name.
+Variables allow us to:
+
+* Store a value without needing to re-compute it
+
+* Write a general expression, e.g., `sqrt(a^2 + b^2)`
+
+* Reduce redundancy (and mistakes)
+
+### Copying
+
+*R* uses "copying" semantics in assignments. 
+That is, when we assign the value of `x` to `y`, 
+then `y` gets the value of `x`, but the variable
+`y` is not linked to `x`. 
+This means that when `x` is changed,
+`y` does not see that change. 
+In the code below,
+`x` begins with the value of 3, then *R* copies this
+value in the assignment statement so that `y` has the
+value of 3.  These two variables are unrelated after that so when we
+assign `x` the value of 10, `y` remains
+unchanged. Below is the code for this simple example,
+```{r}
+x
+y = x
+x
+y
+```
+Again, `y` continues to have the value 3 after
+`x`'s value has changed.
+
+```{r}
+x = 10
+x
+y
+```
+
+
+
+```{r}
+z = 2
+x = z * y
+y = x
+```
+
+What are the values in `x`, `y`, and `z`?
+```{r}
+x
+y
+z
+```
+
+## Compound Expressions
+
+```{r}
+abs(z - x)
+
+sqrt(abs(z - x))
+
+round(sqrt(abs(z - x)))
+
+round(sqrt(abs(z - x)), digits = 1)
+```
+
+
+## Help with Function Calls
+
+To learn how to invoke a function, we can read the documentation in R. 
+For example, `?head` or `help(head)` opens up help pages for the `head` function in the Help window.
+
+```{r, eval=FALSE}
+?head
+```
+
+There, we read that `head` has 2 arguments, `x`  and `n`. This function call will result in the help tab displaying information that looks like the following:
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+### Return the First or Last Part of an Object
+
+#### Description
+
+Returns the first or last parts of a vector, matrix, table, data frame or function. Since head() and tail() are generic functions, they may also have been extended to other classes.
+
+#### Usage
+```
+head(x, ...)
+## Default S3 method:
+head(x, n = 6L, ...)
+## S3 method for class 'data.frame'
+head(x, n = 6L, ...)
+## S3 method for class 'matrix'
+head(x, n = 6L, ...)
+## S3 method for class 'ftable'
+head(x, n = 6L, ...)
+## S3 method for class 'table'
+head(x, n = 6L, ...)
+## S3 method for class 'function'
+head(x, n = 6L, ...)
+```
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The `n` argument has a default value of 6, which means that we don't need
+to specify the value for this argument, if the default value
+is what we want.  No default is provided for `x` so 
+we must provide a value for this argument when we call the function. 
+
+These arguments provide information to the function on 
+how to perform the computations. According to the documentation for 
+the `head` function, the default value of 6 for `n` indicates that 
+the first 6 elements of the object provided via the `x` argument are to be printed to the console. 
+Let's try calling `head` with the `precip` object,
+
+
+```{r}
+head(precip)
+```
+
+The return value is the first 6 values in `precip`. 
+We can print the first 3 elements of `precip` instead, by specifying that
+the argument `n` is 3. We can do this with any of the
+following function calls
+
+```{r, collapse=TRUE}
+head(precip, 3)
+head(precip, n = 3)
+```
+
+R is very flexible in allowing us to call the function in many different ways.
+If we do not provide the argument names then it uses the sequence of the
+values in the function call to assign these values to the arguments. 
+If we use an argument name, then the value provided
+is assigned to that named argument, e.g., with `head(precip, n = 3)` 
+the argument `n` is assigned the value of 3 and the unnamed argument value
+`precip` is matched by position to the remaining argument(s), i.e., to `x`.  
+
+It's a good idea to use argument names. Typically, we don't provide
+the name of the first argument, which is often required, and we do provide
+the names for the remaining arguments. In other words, the typical function
+call is `head(precip, n = 3)`.
+
+There are a few more details about calling functions, which we will return
+to later.
+
+
+
+

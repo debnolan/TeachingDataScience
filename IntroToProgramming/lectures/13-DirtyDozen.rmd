@@ -1,0 +1,193 @@
+---
+title: "Dirty Dozen"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Dirty Dozen Code Recommendations
+
+The following is set up
+```{r}
+n = 2000
+x = vector(mode="numeric", length = n)
+y = x
+bigDF = data.frame(x = rnorm(n), y = rnorm(n), z = runif(n))
+w = runif(n, min = -10, max = 4)
+v = vector(mode = "numeric", length = n)
+K = 22
+```
+
+
+1. Name objects with similar, misleading, or uninformative names, such as `x`, `tmp`.
+
+```{r}
+z1 = rnorm(10)
+z2 = rnorm(10)
+z3 = rnorm(10)
+```
+
+
+What is a better approach to naming/creating these three objects? Is there a data structure more suitable for assignment of the random values? What if the three calls to `rnorm()` generated a different number of random values? 
+
+```{r}
+
+```
+
+
+2. Ignore the type of a vector. 
+
+```{r}
+a =  letters[1:8]
+a[2] = TRUE
+```
+
+Explain why the above code might introduce unexpected behavior later on in your workflow.
+
+
+
+3. Make multiple copies of a large object.
+
+```{r}
+big1 = bigDF[ , 1]
+big2 = bigDF[ , 2]
+big3 = bigDF[ , 3]
+newDF = data.frame(big1,  diff = big2 - big3)
+```
+
+Rewrite the code so that there are no multiple copies of the data.
+```{r}
+
+```
+
+
+4. Initialize a vector, and do it one element at a time. 
+
+```{r}
+for (i in 1:n) {
+   x[i] = 2
+}
+```
+
+Create the vector x without a loop (or apply function).
+```{r}
+
+```
+
+
+5. Subset illogically. 
+
+```{r}
+for(i in 1:n) {
+   if (w[i] < -1) {
+     v[i] = 0
+   } else {
+     if (w[i] > 1) {
+       v[i] = 1
+     } else v[i] = 3*w[i]^2
+   }
+}
+```
+
+
+Rewrite this code, eliminating need for loops and if statements.
+```{r}
+
+```
+
+
+6. Rely on globally set variables inside a function. 
+
+```{r}
+myFunc = function(x) {
+  x = rnorm(100)
+  return(x + K)
+}
+```
+
+Change the signature of the function so that it is clear which external variables are needed.
+
+```{r}
+
+```
+
+
+7. Apply a vectorized function to a vector one element at a time. 
+```{r}
+for (i in 1:n){
+  y[i] = floor(x[i]) + 2
+}
+```
+
+Rewrite this code without using a loop or apply function.
+```{r}
+
+```
+
+
+8. Put an operation that needs to be done once inside a loop. 
+```{r}
+for (i in 2:length(y)){
+  k = 2
+  y[i] = floor(sqrt(y[i-1])) + k
+}
+```
+
+Rewrite the code to make it more efficient.
+```{r}
+
+```
+
+
+9. Call a function several times over, each time tweaking the input arguments slightly. 
+```{r}
+plot(x = seq(0, 0.5, by = 0.02), y = seq(-1.5, -0.5, by = 0.04))
+text(0.289, -1.225, "+500,000", cex = 0.3)
+text(0.289, -1.245, "+100,000", cex = 0.3)
+text(0.289, -1.260, "+50,000", cex = 0.3)
+text(0.289, -1.270, "+10,000", cex = 0.3)
+text(0.289, -1.280, "+1,000", cex = 0.3)
+```
+
+Write a little function, include arguments to text() that do not change from one call to the next. 
+Then write an expression to call the function. 
+Recall text() is vectorized.
+```{r}
+
+```
+
+
+10.  Keep every possible intermediate result, just in case.
+```{r}
+z1 = myFunc(x)
+z2 = z1 * 2
+z3 = log(z2)
+z4 = z3 + 10
+```
+
+
+Simplify these computations into one expression.
+```{r}
+
+```
+
+
+11. Leave objects in your workspace rather than saving them to an `rda` file. Save `bigDF` and `myFunc()`to an rda file called `silly.rda` 
+
+```{r}
+
+```
+
+
+12. Document your code incompletely. 
+Keep similar looking functions around with nearly the same names, 
+some of which work and some of which don't.
+Add documentaion to the following function used in class.
+
+```{r}
+funApply = function(x) {
+ drop = apply(is.na(x), 1, any)
+ x[!drop, ]
+}
+```
+

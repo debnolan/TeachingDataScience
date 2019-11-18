@@ -1,0 +1,363 @@
+---
+title: "Data Types and Vectors"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+## Assignment
+
+Recall, if we want to save the return value to use in another calculation, we assign
+it to a **variable**. For example,
+
+```{r}
+x = 10 ^ (15 / 3 - 2)
+```
+
+Now, when we run this code, nothing is printed to the console. However, the variable `x` contains the value `1000`.  If we want to confirm this, we can type `x` at the prompt and the value is printed at the console.
+
+```{r}
+x
+```
+
+We can also use `x` in another computation, e.g.,
+
+```{r}
+sqrt(x)
+```
+
+Variables have a **name** and a **value**.
+To access the value we use the name.
+Variables allow us to:
+
+* Store a value without needing to re-compute it
+
+* Write a general expression, e.g., `sqrt(a^2 + b^2)`
+
+* Reduce redundancy (and mistakes)
+
+
+## Data Types
+
+R has a number of built-in data types.  The three most basic types are
+numeric, character, and logical vectors. 
+There is no such thing as a scalar in *R*.
+
+A vector is an *ordered* container *primitive elements* of the same type.
+
+We have data on a 14-member family – vectors of their first names,
+age, gender, weight, height, whether or not they are over weight 
+(BMI above 25). What are the data types?
+
+We load the data from my website (you need an internet connection) with 
+```{r}
+load(url(
+  "http://www.stat.berkeley.edu/users/nolan/data/afamily.rda"))
+```
+
+The function `ls()` shows us the contents of our work space.
+```{r}
+ls()
+```
+
+Let's take a look at some of these variables:
+```{r}
+fnames
+fage
+foverWt
+fsex
+fheight
+```
+There are some obvious differences between them.
+We will explore more about these differences.
+
+We can examine the data types and the summary statistics for each of these by calling `class()`, e.g.,
+```{r}
+class(fage)
+summary(fage)
+```
+
+What do you think a summary of `fnames` will give?
+```{r}
+class(fnames)
+summary(fnames)
+```
+
+Let's look at `class(foverWt)`
+```{r}
+class(foverWt)
+summary(foverWt)
+```
+Notice that the `summary()` function provides different
+responses depending on the type of data.
+In the case of logical vectors, it gives a simple count of
+the number of `TRUE`s and `FALSE`s.
+
+A factor vector is a special storage class used for qualitative data.
+The values are internally stored as integers, but each integer corresponds to a level or categoy. 
+The categories have labels that are character strings.
+```{r}
+class(fsex)
+levels(fsex)
+summary(fsex)
+```
+
+How many different versions of the return value of the `summary()` function have you seen? 
+We have examined logical, character, numeric, and factor types. Do they each have a different summary?
+
+## Return Values from Function Calls 
+
+In *R* we have 
+
++ aggregator functions such as `min()`, `mean()`.
++ functions that operate on vectors and return vectors of the same length
++ functions that return different types of objects. 
+
+Here are examples of each. 
+
+### Aggregator Functions
+
+We first call a few aggregator functions:
+```{r}
+min(fweight)
+
+mean(fheight)
+
+var(fage)
+```
+
+### Functions that Return Vectors
+
+Here are some examples of functions that return vectors the same length as the input vector.
+
+Convert `fheight` to centimeters:
+
+```{r}
+fheight / 2.54 
+```
+
+Sort `fweight`: 
+```{r}
+sort(fweight)
+```
+
+Determine which entries in `fage` are under 30:
+```{r}
+fage < 30
+```
+
+### Functions that Return Special Objects
+
+Examples of functions that return different sorts of objects follow:
+
+The `summary()` function returns a table with 6 entries
+```{r}
+y = summary(fheight)
+class(y)
+y
+```
+
+The `plot()` function has a plot as a side effect
+```{r}
+plot(fheight, fweight)
+```
+
+The `lm()` function fits a least squares line to data and return an `lm` object,
+which is a kind of list that has a lot of information relevant to the fit.
+```{r}
+lm.out = lm(fweight ~ fheight)
+class(lm.out)
+names(lm.out)
+```
+Don't worry if you don't know what a least squares line is.
+We're only using it as an example.
+
+We can call `plot()` with the `lm` object.
+We can call `summary()` with the `lm` object.
+We can call `predict()` with the `lm` object.
+And, we can access various elements of the `lm` object to further
+analyze the result of the linear fit.
+
+```{r, eval = FALSE}
+plot(lm.out)
+summary(lm.out)
+```
+
+## Logical Operations
+
+Often we want to compare the elements in a vector to see if they are equal to, greater than, less than, etc. to a particular value.
+
+For example, we can determine how many senior citizens are in our family with
+```{r}
+senior = fage >= 65
+senior
+```
+
+We can find how many members of our family have "Tom" as a name with
+```{r}
+fnames == "Tom"
+```
+
+Two aggregator functions that are useful with logical vectors are `all()` and `any()`. The first returns `TRUE` if all elements in
+the logical vector or `TRUE`. The `any()` function returns `TRUE` if and of the elements in the input vector are `TRUE`.
+```{r}
+all(senior)
+any(senior)
+```
+We see that now all of the family memebers are senior citizens, but
+some of them are.
+
+## Boolean Operations
+
+At times we want to operate on two or more logical vectors.
+For example, we may want to determine whether we have senior 
+citizens who are over wt. 
+```{r}
+senior & foverWt
+```
+
+Or, we may want to know which family members are over weight or senior citizens (or both):
+```{r}
+senior | foverWt
+```
+
+
+## Creating Vectors
+
+It can be useful to create vectors. We demo some of the ways to do this.
+
+The simplest approach is to create vectors whose elements are 1-apart.
+```{r}
+1:5
+-10:-7
+```
+
+The `seq` function is more sophisticated version of `:`
+```{r}
+seq(from = 0, to = 100, by = 10)
+seq(from = 0, to = 100, length = 5)
+seq(from = 0, by = 10, length = 4)
+```
+
+There is also the `c()` function, which we can use to concatenate values together into a vector:
+```{r}
+x = c(1, 20, 0, NA, Inf)
+x
+```
+
+We can concatenate vectors together into one long vector, e.g.,
+```{r}
+c(fage, fweight)
+```
+
+And the `rep()` function. Can you figure out what each is doing? 
+```{r}
+rep(x, each = 2)
+rep(x, times = 2)
+```
+And
+```{r, eval=FALSE}
+rep(x, times = c(3, 1, 5, 0))
+```
+
+
+## Special Values
+
+We put a couple of special characters into the `x` vector that we created earlier. 
+Let's see what happens when we work with them. 
+
+First, let's add 2 to each element of `x`. Before we do this, what do you think might happen when we try to add 2 to an `NA` value?  `NA` stands for Not Available. If we add 2 to a value
+that is not available, then is the new value still not available?
+What about adding 2 to infinity?
+```{r}
+2 + x
+```
+Does the return value make sense?
+
+What do you think the average of the elements in `x` should be?
+9? or NA? or Inf? or an error?
+```{r}
+mean(x)
+```
+
+What happens when we compare `x` to 37, i.e., which elements in `x` are less than 37.
+```{r}
+x < 37
+```
+
+
+## Vectorized Computations
+
+As we described early, *R* works with vectors.
+We can add and subtract vectors and multiply and divide them.
+
+We provide some examples.
+It doesn't make sense, but we can add height and age. 
+```{r}
+fheight
+fage
+fheight + fage
+```
+
+We cna also multiply height and age
+```{r}
+fheight * fage
+```
+
+
+## Coercion 
+
+What happens in the following multipliclation
+```{r}
+foverWt
+fweight * foverWt
+```
+Here We have asked *R* to multiply a numeric vector with a logical vector.
+*R* coerces the logical vector into a numeric vector of 0s and 1s to perform the operation.
+
+Cercinfg a logical vector to 0s and 1s can be very useful.
+For example, describe in words what each of the return values is
+for the following function calls
+```{r}
+sum(foverWt)
+
+sum(foverWt * fweight) / sum(foverWt)
+```
+
+
+What happens in the following concatentation:
+```{r}
+c(fnames, fage)
+```
+This time *R* coerced the ages into character strings.
+
+A vector must have homogenous elements.
+How does *R* decide which data type to coerce?
+Well, *R* can't coerce "Tom" or "Maya" into a number so it
+chooses to coerce 77 and 33 into strings.
+
+## Recycling
+
+What is happening in the following:
+```{r}
+fage
+fage + (1:7)
+```
+*R* *recycles* the values in the shorter vector to match the length of the longer vector and then performs the summation.
+
+
+What happens when the shorter vector is not an integer multiple of the longer one?
+Try it and find out
+
+```{r}
+fage + (1:3)
+```
+
+It performs the computation for us, but gives a warning message.
+
+
+
+
+
+

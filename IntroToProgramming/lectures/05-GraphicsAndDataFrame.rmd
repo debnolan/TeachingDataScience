@@ -1,0 +1,56 @@
+---
+title: "San Francisco Housing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(ggplot2)
+require(dplyr)
+```
+
+The data have been scraepd from week sales published by the San Francisco Chronicle.
+
+It is available at 
+http://www.stat.berkeley.edu/users/nolan/data/sfchronhousing.csv
+
+We should check that the format is as we expect before reading in the data.
+
+
+```{r}
+sfh = read.csv(url("http://www.stat.berkeley.edu/users/nolan/data/sfchronhousing.csv"))
+```
+
+
+## Examine the Size and Quality of the Data
+
+Let's check the size with a call to `dim()`
+
+```{r}
+dim(sfh)
+```
+
+Let's look at a few records at the beginning and end of the file.
+
+```{r}
+head(sfh)
+```
+
+```{r}
+tail(sfh)
+```
+
+We can count the number of sales in each county and city.
+This will also help us see if there are any issues with county or city names.
+
+```{r}
+table(sfh$county)
+```
+
+```{r}
+table(sfh$city)
+```
+

@@ -1,0 +1,167 @@
+---
+title: "Writing Functions"
+output:
+  word_document: default
+  html_document: default
+---
+
+### Task: Rainy Days
+
+Steps to writing a function.
+
+1. Explain the task in words: Calculate the proportion days that it rained.
+
+2. Code for a specific example
+
+```{r,error=TRUE}
+rain1 = c(3, 2, 0, 5, 5, 5, 20, 5, 5, 20)
+sum(rain1 > 0) / length(rain1)
+```
+
+3. Abstract the code and identify variables.
+
+We want to abstract our example so that we can find the fraction of rainy days for any vector of daily measurements of precipitation. 
+That is, we want our function to calculate the fracion of days that it rains from any vector. 
+Let's call this vector `x`. 
+
+Define the signature of the function
+
+
+
+4. Encapsulate code into a function with the generic variables as input arguments. Take the above code for the specific situation of `rain1` and substitute `x` for `rain1`:
+
+Complete the function
+
+
+
+5. Test the code: Call the function multiple times with different inputs to see if the return value is as expected. We can try the function first with our original vector of rain measurements to see if we again get 0.90
+
+
+```{r,error=TRUE}
+calcFracRain(rain1)
+```
+
+We can also make up simple examples, e.g., where it rains on all of the days, and where it rains on 1/2 the days, and where it doesn't rain at all. Below are some tests for these 3 situations:
+
+```{r, collapse=TRUE,error=TRUE}
+test1 = rep(0, 25)
+test2 = c(0, 1, 5, 0, 0, 10)
+test3 = 1:10
+calcFracRain(test1)
+calcFracRain(test2)
+calcFracRain(test3)
+```
+
+We do get the answers that we expect. 
+
+
+### Generalize our function
+
+1. Explain the task: When there are trace amounts of rain, such as 5 100ths of an inch or less, then we don't want to consider that a rainy day in our computation of the fraction of rainy days. 
+
+
+2. Code for a specific example: We can again use `rain1`. 
+We need only a small change to our earlier code.
+
+```{r}
+sum(rain1 > 5) / length(rain1)
+```
+
+3. Abstract the code and identify variables.
+
+The function signature is: 
+
+
+
+
+4. Encapsulate code into a function with the generic variables as input arguments. Complete the function body.
+
+
+
+
+5. Test the code. Write some calls for `calcFracRain()`.
+These calls can use the previous test values. They should confirm
+that the function still works as it did before we changed it AND
+that it works when we supply the new parameter values.
+
+
+
+### Task: Typical Size of a Rain Storm
+
+1. Explain the task in words: Calculate the average amount of rain on a day when it rains. 
+
+2. Code for a specific example: For rain1, we want to find the average for all days when the rainfall is positive, i.e., 
+
+```{r}
+mean(rain1[rain1 > 0])
+```
+
+3. Abstract the code and identify variables.
+
+As in our first example, we want our function to calculate this special mean for any vector. Let's call this vector `x`. We can define a function with `x` as its input argument. While we are at it, let's generalize our function to take the mean for all these values that exceed some amount, as we did earlier.
+
+Write the function's definition
+
+
+
+4. Write the body of the function. Use the code from step 2 to do this.
+
+
+
+
+5. Test the code: Call the function multiple times with different inputs to see if the return value is as expected. We can try the function with our original vector of rain measurements to see if we again get 23.04
+
+
+```{r, collapse=TRUE,error=TRUE}
+calcRainSize(rain1)
+calcRainSize(rain1, 5)
+calcRainSize(test1)
+calcRainSize(test2)
+calcRainSize(test3)
+```
+
+
+
+
+### Another Generalization of our Function
+
+
+1. Explain the task in words: Calculate a summary of amount of rain on a day when it rains, and allow the caller of the function to specify the summary statistic to use in the calculation.
+
+2. Code for a specific example: For the first weather station we want to find the median for all days when the rainfall is positive, i.e., 
+
+```{r}
+median(rain1[rain1 > 5])
+```
+
+ 
+3. Abstract the code and identify variables.
+
+Use the same arguments as for the earlier function, and add one more called
+`sumFun`. This new argument takes a function for its value.
+Provide a default value so that the function performs the same 
+as it did before, when the argument is not specified. 
+
+
+
+Write the function's signature
+
+
+
+
+4. Complete the function by writing the body. 
+ Take the code from the previous version of the function, and substitute `sumFun` for `mean`. 
+
+
+
+
+5. Test the code: We know that when we call our function passing the first vector in `rain`, then the average is 23 and the median is 12. Also, when we drop values 5 or below from our computation, then the mean is 26.1 and the median is 18. Let's confirm that our function returns these values
+
+
+```{r, collapse=TRUE,error=TRUE}
+calcRainSize(rain1)
+calcRainSize(rain1, 5)
+calcRainSize(rain1, sumFun = median)
+calcRainSize(rain1, 5, sumFun = median)
+```
+
