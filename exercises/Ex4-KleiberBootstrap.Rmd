@@ -1,0 +1,255 @@
+---
+title: 'Stat 133 HW01: Exploratory Data Analysis and Getting Familiar with R Expressions'
+author: "Your name and SID"
+output: html_document
+---
+
+### Introduction
+
+This assignment has two purposes: 
+(a) to familiarize you with some of the basic 
+functions in R and how to use them, and 
+(b) to review/introduce some of the key
+concepts in exploratory data analysis.
+
+We will explore a small data set collected by Kleiber. 
+He wanted to study the relationship between an animal's metabolic
+rate and mass.
+
+Kleiber measured the metabolic rate and mass of 19 animals 
+(mouse, dog, cat, goat, man, cow, elephant, ...)
+
+We begin by reading the data from the Web into R.
+
+```{r}
+load(url("http://www.stat.berkeley.edu/users/nolan/data/Kleiber.rda"))
+```
+
+We have loaded several R objects, from the rda file on the Web. 
+The following functions may be useful in answering 
+the questions:
+**class(), cor(), density(), length(), ls(), mean(), min(),
+max(), plot(), quantile(), summary().**
+
+
+1. What are the names of the objects?
+What type of information are they, i.e., are they numeric, logical,
+character, factors? 
+
+```{r}
+ls()
+class(mr)
+class(mass)
+class(name)
+```
+
+*ANS:* Metabolic rate and mass are numeric. Name is a factor
+
+2. Can you confirm that there are measurments on 19 animals 
+available in the Kleiber rda file? (Use the length() function).
+
+```{r}
+length(mr)
+length(mass)
+```
+
+*ANS:* Yes, there are 19 elements in the metabolic rate and mass vectors.
+
+The data do not indicate the units of measurement. 
+metabolic rate is in kilo-calories per day, i.e. kcal/day, and
+mass is in kilograms.
+
+We are ultimately interested in the relationship between mass and 
+metabolic rate, but it's a good idea to begin an exploration of the
+single variables first. 
+
+### Metabolic Rate
+
+We wish to summarize the distribution of the values for metabolic rate. 
+We can summaarize them numerically or graphically.
+
+We begin with numeric summaries. 
+We often summarize values by providing a measure of
+the center or middle value and the typical spread of 
+the values about the center.
+
+3. One measure of center is the mean or average.
+What is the average metabolic rate?  
+
+```{r}
+mean(mr)
+```
+
+*ANS:* The mean metabolic rate is 4505.
+
+4. Read the documentation for the mean function and find the 
+10% trimmed mean and the 50% trimmed mean of metabolic rate. 
+A trimmed mean removes the extreme values before taking the average.  
+For example, a 10% trimmed mean drops the smallest 10% and the 
+largest 10% of the values and takes the mean of the 
+remaining 80% of the data.
+
+
+```{r}
+mean(mr, trim = 0.1)
+mean(mr, trim = 0.5)
+median(mr)
+```
+
+
+5. How do these versions of the mean compare to each other and to 
+the median metabolic rate?
+
+*ANS:* As we trim more extreme values from the vector, the average
+metabolic rate decreases because the distribution has a long 
+right tail. The 50% trimmed mean is equivalent to the median.
+
+
+6. The measure of spread associated with the mean is the standard
+deviation, or SD for short.
+And the measure of spread associated with the median is the 
+inner quartile range, or IQR for short.
+
+Use Google to find the functions in R that compute these quantities
+and report the SD and IQR for metabolic rate.
+Save these quantities as mrSD and mrIQR, respectively.
+
+```{r}
+mrSD = sd(mr)
+mrIQR = IQR(mr)
+```
+
+The numeric summaries are not as informative as graphical summaries 
+of the distribution. 
+With a histogram or density curve, we can get a better sense of how
+the observations are distributed across the values.
+We typically look at particular features of the distribution,
+such as the symmetry or skewness; the number and location of modes;
+the length of the tails; and any gaps where there are no observed values
+or abnormally large/small values.
+
+7. Make a density curve of metabolic rate by composing the plot
+function with the density function. Play around with the bw parameter
+that specifies the amount of smoothness in the curve until you
+have a curve that captures the shape od the data.
+
+```{r}
+plot(density(mr, bw = 800))
+```
+
+Describe the distribution of metabolic rate using the criteria
+mentioned above.
+
+**ANS:** The distribution of metabolic rate is skew right with a few
+very large values at about 8000 and 50000.
+
+8. With highly skewed data or data with a few large values, it 
+can be difficult to see the distribution of the bulk of the data.
+Additionally, many statistical techniques rely on the distribution
+being roughly symmetric. 
+Repeat the visual examination of the distribution for 
+the log of metabolic rate.  What can you see now that was
+not aparent in the earlier plot?
+
+```{r}
+plot(density(log(mr), bw = 0.8))
+```
+
+**ANS** The distribution of the log of metabolic rate appears unimodal with
+a mode around 7. It is skew left with a long left tail.
+
+### Mass
+
+9. Explore the distribution of the mass of the animals. 
+Make a graphical summary of the distribution and describe its general shape.
+
+```{r}
+plot(density(log(mass), bw = 1))
+```
+
+**ANS** The distribution of the log of mass is unimodal with a mode just 
+below 5. The distribution is skew left with a long left tail.
+
+10. In addition, report a five-number summary of the data.
+(The five-number summary consists of the min, lower quartile,
+median, upper quartile, and max of the values).
+
+```{r}
+fivenum(mass)
+```
+
+11. Use subsetting to find the name of the animal with the
+lowest metabolic rate and the animal with the highest metabolic rate.
+
+```{r}
+name[ mr == min(mr) ]
+name[ mr == max(mr) ] 
+```
+
+
+### Relationship Between Metabolic Rate and Mass
+
+Now that we have a clearer picture of the distribution of each of
+our variables of interest, we can examine how they vary together.
+
+Again, we can make a numeric summary and a graphical summary of
+the relationship.
+
+12. For a graphical summary, make a scatter plot of metabolic rate
+against mass. Use the plot() function to do this. 
+Consider plotting the original values and the log of the values
+for metabolic rate and mass (examine all four combinations of 
+transformations of the two variables, e.g., log MR and log Mass, 
+log MR and Mass, MR and log Mass, and MR and Mass).
+Choose the plot that provides the most informative view of
+the relationship between these two variables and provide its plot
+below. 
+
+```{r}
+plot(log(mr) ~ log(mass))
+```
+
+**ANS** The plot that shows the relationsip best is on the log-log
+scale because we can see that it is linear and we know that we
+have transformed the metabolic rate and the mass by taking logs
+of the values.
+
+13. The correlation between two variables is a measure of linear 
+association.  Find the correlation between the log of metabolic rate 
+and the log of mass. How does this compare 
+to the correlation between metabolic rate and mass?
+
+```{r}
+cor(log(mr), log(mass))
+cor(mr, mass)
+```
+
+**ANS:** The correlations are nearly identical. It's a good idea to 
+take logs because the data are more evenly spread out and linear
+and the correlation is not influenced by the few very large values.
+
+Even though the correlation is somewhat lower with the transformed
+data, it's a good idea to take logs. Why? Take a look at the scatter
+plot of the untransformed data and notice the influence of the largest
+animal.
+
+
+
+14. Metabolic rate is measured in kcal/day. 
+Convert metabolic rate to joules per hour. 
+Save these transformed values in the variable called newMR.
+Then, compute the correlation between the new metabolic rate and mass. 
+How does the correlation change?
+The correlation coefficient is said to be unitless.
+Why does this property explain the correlation between the revised
+metabolic rate and mass?
+
+```{r}
+newMR = mr * 4186 / 24
+
+cor(newMR, mass)
+```
+
+**ANS:** The correlation is unchanged. The correlation is a unitless
+measure between -1 ad 1 and is not effected by the addition of a constant 
+to each value or by the rescaling of each value.

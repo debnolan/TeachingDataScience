@@ -1,0 +1,322 @@
+---
+title: "Wait Times for Repairs"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(ggplot2)
+```
+
+*From Hesterberg's article "What Teachers Should Know about the Bootstrap: Resampling in the Undergraduate Statistics Curriculum"*
+
+
+# Introduction
+
+The New York Public Utilities Commission monitors the response time
+for repairing land-line phone service in the state.  These repair
+times may differ over the year and according to the type of repair.
+We have repair times for one class of repairs at one time period.  The
+commission is interested in estimates of the average repair time.
+
+### Read in the data 
+
+
+Read in the data provided in `data/ilec.csv`.
+
+```{r}
+repair = read.csv("../Data/ilec.csv", header = FALSE)
+names(repair) = "wait_time"
+head(repair)
+
+```
+
+
+### Explore the distribution of repair time
+
+Before making any estimates of average repair time, we examine the data values. Make a histogram of the logarithm of repair time. When taking logs, use base 10. When there are 0 values, we often add 1 before taking the log.
+
+```{r}
+ggplot(repair, aes(x = wait_time)) +
+  geom_histogram(aes(y = ..density..), bins = 40)
+```
+
+We see that there is a spike at 0, which indicates that
+many repairs happen immediately. We also see two modes (not counting the spike). Furthermore, the distribution is skewed right with a long tail indicating that a few repairs take a long time.
+
+Let's plot this on log10 scale for a better view.
+
+```{r}
+ggplot(repair, aes(x = (1+ wait_time))) +
+  geom_histogram(aes(y = ..density..), bins = 40) +
+  scale_x_log10() +
+  labs(x = "Time to Repair (log hours + 1) ")
+```
+
+This plot makes it very clear that there is a spike at 0 (we added 1 in order to take the log), and in addition there are two main modes.
+The second mode is centered near $24$, which indicates that many repairs occur then next day. 
+
+
+```{r}
+n = length(repair$wait_time)
+n
+avg_time = mean(repair$wait_time)
+avg_time
+sd_time = sd(repair$wait_time)
+sd_time
+```
+
+
+
+
+## Normal Theory
+
+If we assume that the sampling distribution of the sample mean is normally distributed, then we can use this property to create a confidence interval. The sampling distribution of a statistic is often approximately normally distributed.
+
+For a standard normal, which is centered at 0 and has a spread of 1, we can find the percentiles with the `pnorm' function.  
+
+
+```{r}
+pnorm(c(-1, 0 , 1))
+```
+
+And we can find the quantiles with `qnorm'
+
+```{r}
+qnorm(c(0.025, 0.975))
+```
+
+### Normal-based confidence intervals
+
+$$
+\begin{eqnarray*}
+.95 &=& {\cal P}\left(-1.96 \leq \frac{\hat{\theta} - \theta} {SE({\hat{\theta}})} \leq 1.96\right) \\
+ & = & {\cal P}\left(-1.96 SE({\hat{\theta}}) \leq {\hat{\theta} - \theta} \leq 1.96 SE({\hat{\theta}})\right) \\
+ & = & {\cal P}\left(\hat{\theta} - 1.96SE({\hat{\theta}}) \leq {\theta} \leq \hat{\theta} + 1.96SE({\hat{\theta}})\right)
+\end{eqnarray*}
+$$
+
+Thus the interval $(\hat{\theta} - 1.96SE({\hat{\theta}}),
+\hat{\theta} + 1.96SE({\hat{\theta}}))% is a 95%
+confidence interval for $\theta$.
+
+
+Often we don't know $\sigma$, and so we can't make the confidence interval.  However, we can  use the sample SD as an estimate for $\sigma$, i.e., $SE(\hat{\theta}) = \sigma/\sqrt{n} \approx SD(\texttt{sample})/\sqrt{n}$. When we make this substitution, the distribution of the standardized statistic is no longer normal. That is, the distribution of
+$$ \frac{\hat{\theta} - \theta} {SD(\texttt{sample})/\sqrt{n}}$$
+follows a $t$-distribution. 
+
+The $t$-distribution is actually a family of distributions. it is parameterized by the "degrees of freedom", which in our case is $n-1$.  The $t$-distirbution is symmetric and unimodal and looks much like the normal distribution, except the that tails are somewhat fatter. As $n$ increases, the sample SD approaches $\sigma$, the population SD, and the tails of the $t$-distribution get less fat and converge to the normal tails.
+
+With the $t$-distribution, the 95% confidence interval becomes:
+
+$$\left(\hat{\theta} - t_{0.975, n-1} \frac{SD(\texttt{sample})}{\sqrt{n}}, ~~~\hat{\theta} - t_{0.025, n-1} \frac {SD(\texttt{sample})}{\sqrt{n}}\right)$$
+
+
+When bootstrapping was computationally infeasible, we relied heavily on the Central Limit Theorem to form confidence intervals for the population. Of course, an important question is whether $n$ is large enough to justify the assumption that that the CLT holds and we can treat our sample statistic as normally distributed.
+
+Create a 95% confidence interval for the average wait time. Why do we not need to use the $t$-quantiles?
+
+Place the endpoints of the interval in `normal_CI'.
+
+```{r}
+se_avg_time = sd_time/sqrt(n)
+
+normal_CI = c(avg_time - qnorm(0.975) * se_avg_time, 
+              avg_time - qnorm(0.025) * se_avg_time)
+
+normal_CI
+```
+
+With over 1500 observations, there is no difference between a normal curve and a $t$ with 1500+ degrees of freedom.
+
+ 
+## Percentile Bootstrap  
+
+Given that the sample size is well over 1500, we imagine that
+the Central Limit Theorem (CLT) could well have taken
+effect and the distribution of the normalized sample mean will be very close to the normal.
+
+
+It's highly likely that a bootstrap sample should look like the original sample.
+Confirm this by comparing the histogram of one bootstrapped sample to the earlier histogram
+
+```{r}
+bootSample = sample(repair$wait_time, n, replace = TRUE)
+
+ggplot(data.frame(wait_time = (bootSample + 1)), 
+       aes(x = wait_time)) +
+  geom_histogram(aes(y = ..density..), bins = 40) +
+  scale_x_log10() +
+  labs(x = "One Bootstrap Sample of Time to Repair (log hours + 1) ")
+
+```
+
+
+Create a bootstrap estimate the bootstrap sampling distribution of the (upper trimmed) sample mean. Use 10,000 replicates. In addition to computing the mean, also compute the SD from each sample.
+
+Assign the return value to `bootStats`.
+
+```{r}
+set.seed(2461)
+bootStats = 
+  replicate(100000, {
+    bootSample = sample(repair$wait_time, n, replace = TRUE)
+    c(mean(bootSample), sd(bootSample))
+  })
+```
+
+
+Make a histogram of the bootstrapped means. Does the bootstrapped sampling distribution of the mean look symmetric? Roughly normal?
+
+```{r}
+ggplot(data.frame(boot_means = bootStats[1,], 
+                  boot_sds = bootStats[2,]),
+       aes(x = boot_means)) +
+  geom_histogram(aes(y = ..density..), bins = 40) +
+  labs(x = "Bootstrapped Sampling Distribution of mean Time to Repair")
+
+```
+
+A normal quantile plot may be helpful to identify small deviations.
+
+```{r}
+ggplot(data.frame(boot_means = bootStats[1,]),
+       aes(sample = boot_means)) +
+  stat_qq()
+```
+
+Fine the percentile bootstrap 95% confidence interval for the population mean. Also determine how far the endpoint are from the sample mean. Place the endpoints of the interval in `boot_percentile_CI'
+
+```{r}
+boot_percentile_CI = quantile(bootStats[1, ], probs = c(0.025, 0.975))
+
+boot_percentile_CI
+```
+
+
+## The Studentized Bootstrap
+ 
+One variation on the bootstrap confidence interval uses the approach of standardizing the statistic in $t$ and normal based confidence intervals.  
+This variation finds the bootstrap sampling distribution of the standardized statistic, i.e., we subtract the population statistic from the sample statistic and
+divide by the standard error of the sampling statistic. 
+Then, we use the percentiles of this distribution to create the confidence interval.
+
+
+As in the case of the normal theory for the sample mean, 
+if $\theta$ is the population parameter, and we estimate $\theta$ with our sample
+statistic $\hat{\theta}$, then we can create a confidence interval on the distribution of
+
+$$ \frac{\hat{\theta} - \theta} {SE({\hat{\theta}})}$$
+
+from the 2.5 and 97.5 percentile of the distribution of the standardized statistic.
+If $q_{0.025}$ and $q_{0.975}$ are the percentiles of this standardized statistic, then
+
+$$
+\begin{eqnarray*}
+0.95 &=& {\cal P}\left(q_{0.025} \leq \frac{\hat{\theta} - \theta} {SE({\hat{\theta}})} \leq q_{0.975}\right) \\
+ & = & {\cal P}\left(q_{0.025}SE({\hat{\theta}}) \leq {\hat{\theta} - \theta} \leq q_{0.975}SE({\hat{\theta}})\right) \\
+ & = & {\cal P}\left(\hat{\theta} - q_{0.975}SE({\hat{\theta}}) \leq {\theta} \leq \hat{\theta} - q_{0.025}SE({\hat{\theta}})\right) 
+\end{eqnarray*}
+$$
+
+Thus the interval 
+$$(\hat{\theta} - q_{0.975}SE({\hat{\theta}}),
+\hat{\theta} - q_{0.025}SE({\hat{\theta}}))$$
+is a 95% confidence interval for $\theta$.
+
+Note that we have not used any normal theory or central limit theorem here. We have simply created a confidence interval based on the sampling distribution of the studentized statistic.
+
+We can use the bootstrap to estimate the sampling distribution of the
+studentized statistic.  That is, for each bootstrap sample, we compute the
+bootstrap statistic, $\hat{\theta}^*$,
+and the bootstrap standard error of this statistic,
+$SE^*(\hat{\theta}^*)$ and use these to
+construct the studentized statistic,
+
+$$ \frac{\hat{\theta}^* - {\hat{\theta}}} {SE({\hat{\theta}}^*)}$$
+
+We estimate $q_{0.025}$ and $q_{0.975}$ from these bootstrap replicates. 
+Depending on the form of $\hat{\theta}$, its standard error
+can be approximated by a simple function of the sample, and
+consequently, the standard error of the bootstrap statistic,
+$\hat{\theta}^*$, can be approximated
+by a simple function of the bootstrap sample. 
+
+One example is the mean. Recall that the standard error of the sample mean
+is $\sigma / {\sqrt{n}}$, where
+$\sigma$ is the standard deviation of
+the population, which we approximate by the standard deviation
+of the sample. This implies that we can approximate the standard error
+of the bootstrap sample mean with $SD^* /
+{\sqrt{n}}$, where
+$SD^*$ is the standard deviation of
+the bootstrap sample. Other times, we don't have a simple format for
+the standard error and we need an alternative method of
+approximation. 
+
+You will apply this approach to find a studentized bootstrap confidence interval with
+data collected for estimating the typical repair times for a population of customers.
+
+Use the `bootStats' means and SDs computed earlier to construct a studentized bootstrap confidence interval.
+
+Place the endpoints of the confidence interval in `student_boot_CI'.
+
+
+```{r}
+student_boot = (bootStats[1,] - avg_time)/ (bootStats[2,]/sqrt(n))
+
+student_boot_CI = avg_time - quantile(student_boot, 
+                                      probs = c(0.975, 0.025))
+
+student_boot_CI
+```
+
+
+## Bootstrapped confidence intervals
+
+For positively skewed populations, the spread of the bootstrap distribution for the bootstrapped mean depends on the sample mean. 
+To obtain accurate confidence intervals, we need to allow for such a relationship.  The bootstrap $t$ estimates how many standard errors to go in each direction. 
+
+Compare the three confidence intervals: normal-theory, bootstrap percentile, and studentized bootstrap.
+To do this, find the distance from the endpoints of the intervals
+to the mean. 
+
+
+```{r}
+normal_CI - avg_time
+boot_percentile_CI - avg_time
+student_boot_CI - avg_time
+```
+
+Notice how the bootstrap percentile interval is asymmetric with the asymmetry in the same direction as the data. The same is the case for the studentized bootstrap.
+
+Compare the ratio of these two distances to get a sense of the size of the asymmetry
+
+```{r}
+(normal_CI[2] - avg_time) / (avg_time - normal_CI[1])
+(boot_percentile_CI[2] - avg_time) / (avg_time -
+                                        boot_percentile_CI[1])
+(student_boot_CI[2] - avg_time) / (avg_time - student_boot_CI[1])
+```
+
+
+Note that when the bootstrap sample is larger than the sample mean, the bootstrap SD also tends to be large. We can confirm this via 
+the positive correlation between the bootstrapped mean and it's SD.
+```{r}
+cor(bootStats[1,], bootStats[2,])
+```
+
+Also, make a scatter plot of the pairs of the bootstrapped mean and SD. 
+
+```{r}
+ggplot(data.frame(boot_means = bootStats[1,], 
+                  boot_sds = bootStats[2,]),
+       aes(x = boot_means, y = boot_sds)) +
+  geom_point(alpha = 0.02) +
+  labs(x = "Bootstrapped means", y= "Bootstrapped SDs")
+```
+
+

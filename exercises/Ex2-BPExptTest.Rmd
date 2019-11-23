@@ -1,0 +1,71 @@
+---
+title: "BP Expt Hypothesis Test"
+output: html_document
+---
+```{r}
+library(ggplot2)
+```
+
+
+## The Data
+
+```{r}
+bp = read.csv('../data/BPExpt.csv')
+```
+
+
+## Informal Analysis
+
+```{r}
+ggplot(bp, aes(x = BPchange, y = group)) +
+  geom_jitter(height = 0.15, width = 0)
+```
+
+Summary Statistics
+
+```{r}
+mean(bp$BPchange[bp$group=="t"])
+mean(bp$BPchange[bp$group=="c"])
+```
+
+
+
+## Urn Model
+
+```{r}
+urn = bp$BPchange
+urn
+```
+
+Sample one
+```{r}
+permuteExpt = (sample(urn, 10, replace = FALSE))
+permuteExpt
+```
+
+```{r}
+mean(permuteExpt)
+```
+
+
+Repeat
+```{r}
+avgs = replicate(100000, 
+                 mean(sample(urn, 10, replace = FALSE)))
+```
+
+
+Examine results
+
+```{r}
+ggplot(data = data.frame(avgs), aes(x=avgs)) +
+  geom_histogram(aes(y = ..density..), 
+                 color = "black", fill = "grey", 
+                 alpha = 0.4, bins = 30)
+```
+
+Fraction 5 or above
+```{r}
+sum(avgs >= 5)/100000
+```
+
