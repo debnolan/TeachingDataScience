@@ -1,255 +1,154 @@
 ---
-title: 'Stat 133 HW01: Exploratory Data Analysis and Getting Familiar with R Expressions'
-author: "Your name and SID"
+title: 'A Study of Metabolic Rate'
+author: "Your name"
 output: html_document
 ---
 
+```{r}
+library(ggplot2)
+```
+
 ### Introduction
 
-This assignment has two purposes: 
-(a) to familiarize you with some of the basic 
-functions in R and how to use them, and 
-(b) to review/introduce some of the key
-concepts in exploratory data analysis.
+We examine the relationship between metabolic rate and mass using a small data set collected by Kleiber in 1947. Kleiber measured the metabolic rate and mass of 19 animals (mouse, dog, cat, goat, man, cow, elephant, ...).
 
-We will explore a small data set collected by Kleiber. 
-He wanted to study the relationship between an animal's metabolic
-rate and mass.
-
-Kleiber measured the metabolic rate and mass of 19 animals 
-(mouse, dog, cat, goat, man, cow, elephant, ...)
-
-We begin by reading the data from the Web into R.
-
+We read Kleiber's results into *R* with
 ```{r}
-load(url("http://www.stat.berkeley.edu/users/nolan/data/Kleiber.rda"))
+animals = read.table("../data/KleiberData.txt", header = TRUE)
+head(animals)
 ```
 
-We have loaded several R objects, from the rda file on the Web. 
-The following functions may be useful in answering 
-the questions:
-**class(), cor(), density(), length(), ls(), mean(), min(),
-max(), plot(), quantile(), summary().**
 
+## Exploration
 
-1. What are the names of the objects?
-What type of information are they, i.e., are they numeric, logical,
-character, factors? 
+We confirm that there are measurements on 19 animals 
 
 ```{r}
-ls()
-class(mr)
-class(mass)
-class(name)
+dim(animals)
 ```
 
-*ANS:* Metabolic rate and mass are numeric. Name is a factor
-
-2. Can you confirm that there are measurments on 19 animals 
-available in the Kleiber rda file? (Use the length() function).
-
-```{r}
-length(mr)
-length(mass)
-```
-
-*ANS:* Yes, there are 19 elements in the metabolic rate and mass vectors.
-
-The data do not indicate the units of measurement. 
-metabolic rate is in kilo-calories per day, i.e. kcal/day, and
+The data frame does not indicate the units of measurement. 
+Metabolic rate is in kilo-calories per day, i.e. kcal/day, and
 mass is in kilograms.
 
-We are ultimately interested in the relationship between mass and 
-metabolic rate, but it's a good idea to begin an exploration of the
-single variables first. 
 
-### Metabolic Rate
-
-We wish to summarize the distribution of the values for metabolic rate. 
-We can summaarize them numerically or graphically.
-
-We begin with numeric summaries. 
-We often summarize values by providing a measure of
-the center or middle value and the typical spread of 
-the values about the center.
-
-3. One measure of center is the mean or average.
-What is the average metabolic rate?  
+We examine the relationship between mass and metabolic rate with a scatter plot. 
 
 ```{r}
-mean(mr)
+ggplot(animals, aes(x = Mass, y = MR)) +
+  geom_point() 
 ```
 
-*ANS:* The mean metabolic rate is 4505.
-
-4. Read the documentation for the mean function and find the 
-10% trimmed mean and the 50% trimmed mean of metabolic rate. 
-A trimmed mean removes the extreme values before taking the average.  
-For example, a 10% trimmed mean drops the smallest 10% and the 
-largest 10% of the values and takes the mean of the 
-remaining 80% of the data.
-
-
-```{r}
-mean(mr, trim = 0.1)
-mean(mr, trim = 0.5)
-median(mr)
-```
-
-
-5. How do these versions of the mean compare to each other and to 
-the median metabolic rate?
-
-*ANS:* As we trim more extreme values from the vector, the average
-metabolic rate decreases because the distribution has a long 
-right tail. The 50% trimmed mean is equivalent to the median.
-
-
-6. The measure of spread associated with the mean is the standard
-deviation, or SD for short.
-And the measure of spread associated with the median is the 
-inner quartile range, or IQR for short.
-
-Use Google to find the functions in R that compute these quantities
-and report the SD and IQR for metabolic rate.
-Save these quantities as mrSD and mrIQR, respectively.
-
-```{r}
-mrSD = sd(mr)
-mrIQR = IQR(mr)
-```
-
-The numeric summaries are not as informative as graphical summaries 
-of the distribution. 
-With a histogram or density curve, we can get a better sense of how
-the observations are distributed across the values.
-We typically look at particular features of the distribution,
-such as the symmetry or skewness; the number and location of modes;
-the length of the tails; and any gaps where there are no observed values
-or abnormally large/small values.
-
-7. Make a density curve of metabolic rate by composing the plot
-function with the density function. Play around with the bw parameter
-that specifies the amount of smoothness in the curve until you
-have a curve that captures the shape od the data.
-
-```{r}
-plot(density(mr, bw = 800))
-```
-
-Describe the distribution of metabolic rate using the criteria
-mentioned above.
-
-**ANS:** The distribution of metabolic rate is skew right with a few
-very large values at about 8000 and 50000.
-
-8. With highly skewed data or data with a few large values, it 
-can be difficult to see the distribution of the bulk of the data.
-Additionally, many statistical techniques rely on the distribution
+With highly skewed data or data with a few large values, it 
+can be difficult to see the relationship between the variables.
+Additionally, many statistical techniques rely on distributions
 being roughly symmetric. 
-Repeat the visual examination of the distribution for 
-the log of metabolic rate.  What can you see now that was
-not aparent in the earlier plot?
+
+We make another plot of the data using log scales for both variables. 
 
 ```{r}
-plot(density(log(mr), bw = 0.8))
+ggplot(animals, aes(x = Mass, y = MR)) +
+  geom_point() +  scale_x_log10() + scale_y_log10()
 ```
 
-**ANS** The distribution of the log of metabolic rate appears unimodal with
-a mode around 7. It is skew left with a long left tail.
+From the second plot on the log-log scale, a linear relationship is evident.
 
-### Mass
+## Fitting a simple linear model
 
-9. Explore the distribution of the mass of the animals. 
-Make a graphical summary of the distribution and describe its general shape.
+We fit a simple linear model for metabolic rate and examine
+the coefficient for mass. A physical model for the relationship between these two variables is based on the following relationships between mass and volume and metabolic rate and surface area:
+
+$$ mass \propto radius^3$$
+$$ metabolic~rate \propto radius^2$$
+Hence,
+$$ metabolic~rate \propto mass^{2/3}$$
 
 ```{r}
-plot(density(log(mass), bw = 1))
+lm(log(MR) ~ log(Mass), data = animals)
 ```
 
-**ANS** The distribution of the log of mass is unimodal with a mode just 
-below 5. The distribution is skew left with a long left tail.
+We see that the slope of mass is nearly 3/4, not 2/3. Could this be spurious? In other words, what if the true line does have a slope of  2/3 and the slope that we observed was just due to randomness in generating the points that form our sample? We will use a bootstrapping process to help address this question.
+ 
 
-10. In addition, report a five-number summary of the data.
-(The five-number summary consists of the min, lower quartile,
-median, upper quartile, and max of the values).
+## Bootstrapping the animals
+
+We can simulate new samples by random sampling with replacement from the original sample, as many times as the original sample size. Each of these new samples will give us a scatter plot and a simple linear regression. We will call these the bootstrapped scatter plot and regression line.
+
+Let's take one bootstrap sample and examine the scatter plot and regression line.
+
+We first deterimine which pairs of metabolic rate and mass to include in the bootstrap sample.  The `sample()` function has a shorthand way of doing this:
 
 ```{r}
-fivenum(mass)
+sample(19, replace = TRUE)
 ```
 
-11. Use subsetting to find the name of the animal with the
-lowest metabolic rate and the animal with the highest metabolic rate.
+Run the above code chunk a few times and look for repeated observations in the sample. 
+
+We use the ransom indices to create the bootstrap sample with:
 
 ```{r}
-name[ mr == min(mr) ]
-name[ mr == max(mr) ] 
+bootInd = sample(19, replace = TRUE)
+bootSamp = animals[bootInd, ]
 ```
 
-
-### Relationship Between Metabolic Rate and Mass
-
-Now that we have a clearer picture of the distribution of each of
-our variables of interest, we can examine how they vary together.
-
-Again, we can make a numeric summary and a graphical summary of
-the relationship.
-
-12. For a graphical summary, make a scatter plot of metabolic rate
-against mass. Use the plot() function to do this. 
-Consider plotting the original values and the log of the values
-for metabolic rate and mass (examine all four combinations of 
-transformations of the two variables, e.g., log MR and log Mass, 
-log MR and Mass, MR and log Mass, and MR and Mass).
-Choose the plot that provides the most informative view of
-the relationship between these two variables and provide its plot
-below. 
+The scatter plot of the bootstrap sample looks similar to the original scatter plot of the sample. 
 
 ```{r}
-plot(log(mr) ~ log(mass))
+ggplot(bootSamp, aes(x = Mass, y = MR)) +
+  geom_point() +  scale_x_log10() + scale_y_log10()
 ```
 
-**ANS** The plot that shows the relationsip best is on the log-log
-scale because we can see that it is linear and we know that we
-have transformed the metabolic rate and the mass by taking logs
-of the values.
 
-13. The correlation between two variables is a measure of linear 
-association.  Find the correlation between the log of metabolic rate 
-and the log of mass. How does this compare 
-to the correlation between metabolic rate and mass?
+Next, we fit the regression line to the bootstrap sample and examine
+the coefficient for the slope.
+```{r}
+lm(log(MR) ~ log(Mass), data = bootSamp)
+```
+
+### Approximate the bootstrap distribution
+
+Replicate the bootstrap procedure 2,000 times and save the coefficient for the slope:
+```{r}
+bootSlopes = replicate(2000, {
+  bootInd = sample(19, replace = TRUE)
+  bootSamp = animals[bootInd, ]
+  lm(log(MR) ~ log(Mass), data = bootSamp)$coefficients[2]
+})
+```
+
+We approximate the sampling distribution of the bootstrapped slope with our 2,000 replicates. The histogram appears below. 
 
 ```{r}
-cor(log(mr), log(mass))
-cor(mr, mass)
+ggplot(data = data.frame(bootSlopes), aes(x = bootSlopes)) +
+  geom_histogram(aes(y = ..density..), 
+                 color="black", fill = "grey", alpha = 0.4)
 ```
 
-**ANS:** The correlations are nearly identical. It's a good idea to 
-take logs because the data are more evenly spread out and linear
-and the correlation is not influenced by the few very large values.
+## Could the true slope be 2/3?
 
-Even though the correlation is somewhat lower with the transformed
-data, it's a good idea to take logs. Why? Take a look at the scatter
-plot of the untransformed data and notice the influence of the largest
-animal.
+To decide whether or not the slope actually is 2/3, we test the following hypothesis:
 
+**Null Hypothesis** The slope of the true line is 2/3.
 
+**Alternative Hypothesis** The slope of the true line is not 2/3.
 
-14. Metabolic rate is measured in kcal/day. 
-Convert metabolic rate to joules per hour. 
-Save these transformed values in the variable called newMR.
-Then, compute the correlation between the new metabolic rate and mass. 
-How does the correlation change?
-The correlation coefficient is said to be unitless.
-Why does this property explain the correlation between the revised
-metabolic rate and mass?
+To test this hypothesis, we can construct a 95% confidence interval for the true slope using the bootstrap percentile method. Then, we determine whether the interval contains 2/3.  If it doesn't, then we reject the null hypothesis (with the 5% cutoff for the p-value). If the confidence interval for the true slope does contain 2/3, then we don't have enough evidence to reject the null hypothesis. 
+
+The confidence interval extends from the 2.5th percentile to the 97.5th percentile of the 2000 bootstrapped slopes.
 
 ```{r}
-newMR = mr * 4186 / 24
-
-cor(newMR, mass)
+quantile(bootSlopes, probs = c(0.025, 0.975))
 ```
 
-**ANS:** The correlation is unchanged. The correlation is a unitless
-measure between -1 ad 1 and is not effected by the addition of a constant 
-to each value or by the rescaling of each value.
+Our interval does not contain 2/3 so we reject the hypothesis that the true slope is 2/3.
+
+### Caveats
+The bimodal distribution of the bootstrapped slopes indicates that we may not have enough data to be carrying out the bootstrap.
+
+
+### More recent findings
+Kleiber's rule was studied by Clarke in 2010.
+Clarke had hundreds of animals and found the slope of the regression of
+log metabolic rate on log mass to be 0.75.
+
+

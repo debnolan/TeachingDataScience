@@ -1,27 +1,42 @@
 ---
-title: "BP Expt Hypothesis Test"
+title: "Blood Pressure Randomized Controlled Experiment"
 output: html_document
 ---
 ```{r}
 library(ggplot2)
 ```
 
+*Adapted From Cobb's "Randomization Tests" in "Discrete Markov Chain Monte Carlo"*
+
+## Introduction
+
+To test whether taking calcium supplements can reduce blood pressure, investigators used a chance device to divide 21 male subjects into two groups.  One group of 10 men, the treatment group, were given calcium supplements and told to take them every day for 12 weeks.  The other 11 men, the control group, were given pills that looked the same as the supplements (a placebo), and given the same instructions:  take one every day.  Neither the subjects themselves nor the people giving out the pills and taking blood pressure readings knew which pills contained the calcium.  (The experiment was double blind.)   
 
 ## The Data
 
+Subjects had their blood pressure read at the beginning of the study and again at the end.  The numbers below tell the reduction in systolic blood pressure (when the heart is contracted), in millimeters of mercury.  (Positive values are good; negative values mean that the blood pressure went up.)
+
 ```{r}
 bp = read.csv('../data/BPExpt.csv')
+bp
 ```
 
 
 ## Informal Analysis
+
+Before conducting a hypothesis test as to whether the calcium supplement was effective in reducing blood pressure, we compare the two groups 
+with a statistical graph.
 
 ```{r}
 ggplot(bp, aes(x = BPchange, y = group)) +
   geom_jitter(height = 0.15, width = 0)
 ```
 
-Summary Statistics
+
+Note that we jittered the points a little to avoid over plotting.
+We see a lot of overlap in the range of values for the two groups.
+The summary means (below) show that those taking the treatment
+reduced their blood pressure by 5 mm Hg on average and the control group increased by a small amount (0.27 mm Hg).
 
 ```{r}
 mean(bp$BPchange[bp$group=="t"])
@@ -30,32 +45,53 @@ mean(bp$BPchange[bp$group=="c"])
 
 
 
+## Hypothesis Test Set up
+
+Was the calcium supplement effective in lowering blood pressure? The only differences between the two groups were:
+
++ the calcium, and 
++ differences created by the random assignment  
+
+If we assume that the calcium had no effect, then the observed reduction of 5 mm Hg in the calcium group was due purely to chance, that is, to the random assignment.  To see whether chance is a believable way to account for the average of 5, we ask, 
+
+**If you take the 21 blood pressure values, and choose 10 of them at random, how likely is it that you get an average of 5 or more?**
+
+If this probability, the p-value, is tiny, we conclude that chance is not a believable explanation; it must be due to the calcium treatment.
+
 ## Urn Model
+
+We use the urn model to approximate this probability. 
+We put into the urn all 21 blood pressure measurements:  
 
 ```{r}
 urn = bp$BPchange
 urn
 ```
 
-Sample one
+We draw 10 at random from the urn, these correspond to the randomization of subjects to the treatment (those drawn) and the control (those left in the urn).
+
 ```{r}
 permuteExpt = (sample(urn, 10, replace = FALSE))
 permuteExpt
 ```
 
+The average value for this random selection is not 5:
 ```{r}
 mean(permuteExpt)
 ```
 
 
-Repeat
+To approximate the sampling distribution of the average value, 
+we take 100,000 samples of 10 from the urn.
 ```{r}
 avgs = replicate(100000, 
                  mean(sample(urn, 10, replace = FALSE)))
 ```
 
 
-Examine results
+## What does the simulation tell us?
+
+We plot the approximate sampling distribution of the 100,000 repetitions.
 
 ```{r}
 ggplot(data = data.frame(avgs), aes(x=avgs)) +
@@ -64,8 +100,10 @@ ggplot(data = data.frame(avgs), aes(x=avgs)) +
                  alpha = 0.4, bins = 30)
 ```
 
-Fraction 5 or above
+Clearly, 5 is not a typical value. We can use the fraction of the 100,000 means that are at least 5 to approximate the probability of getting an average of 5 or more.
+
 ```{r}
 sum(avgs >= 5)/100000
 ```
 
+The p-value is about 6.5%. Not small enough to reject the hypothesis that the calcium had no effect and the difference was just due to the random assignment to treatment and control.
