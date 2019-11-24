@@ -6,12 +6,12 @@ output:
 ---
 
 ```{r}
-library(dplyr)
+#library(MASS)
 library(tidyr)
+library(dplyr)
 library(ggplot2)
 library(readr)
-library(MASS)
-library(car)
+#library(car)
 ```
 
 ```{r}
@@ -24,11 +24,6 @@ summary(donkeys)
 
 We will continue with the article on predicting a donkey's weight based on other easier to collect measurements. Our focus here is on exploratory data analysis. 
 
-The data are available in the the `donkeys` data frame in the `paranomo` package so we load it in with the following call.
-
-```{r, eval=FALSE}
-library(paranomo)
-```
 
 ## Variables and Data types
 
@@ -58,7 +53,7 @@ Recall the following definitions of the variables from the article are:
 * `Age` - under 2, 2-5, 5-10, 10-15, 15-20, and > 20
 * `Sex` - stallion, gelding, and female
 * `Length` - elbow to back of pelvis (cm)
-* `Girth` - circumference behind fron leg (cm)
+* `Girth` - circumference behind front leg (cm)
 * `Height` - to withers (cm)
 * `Weight` - in kg
 * `WeightAlt` - not sure
@@ -69,7 +64,7 @@ The variables `BCS`, `Age`, and `Sex` are categorical variables. Both `BCS` and 
 
 The remaining variables are quantitative. More specifically, they are ratio, i.e., it makes sense to talk about a donkey weighing 1.5 times as much as another or being 20% taller than another. 
 
-The variable types help us figure out what kinds of summary statistics and plots to make to explore the data. With qualitative data we examine tables of counts or percentages and bar plots.  For quantiative variables we examine quantiles, means and sds, and histograms. Let's examine each variable in turn.
+The variable types help us figure out what kinds of summary statistics and plots to make to explore the data. With qualitative data we examine tables of counts or percentages and bar plots.  For quantitative variables we examine quantiles, means and sds, and histograms. Let's examine each variable in turn.
 
 
 
@@ -178,12 +173,15 @@ Carry out EDA on the training data.
 The histogram may be more informative than the few numeric summaries.
 
 ```{r}
-ggplot(donkeys, aes(x = Length, y = ..density..)) + geom_histogram(bins= 20)
-ggplot(donkeys, aes(x = Girth, y = ..density..)) + geom_histogram(bins= 20)
-ggplot(donkeys, aes(x = Height, y = ..density..)) + geom_histogram(bins= 20)
+ggplot(donkeys, aes(x = Length, y = ..density..)) + 
+  geom_histogram(bins= 20)
+ggplot(donkeys, aes(x = Girth, y = ..density..)) + 
+  geom_histogram(bins= 20)
+ggplot(donkeys, aes(x = Height, y = ..density..)) + 
+  geom_histogram(bins= 20)
 ```
 
-All three distributions show a skew to the left, i.e., more smaller donkeys. The medians being larger than the means confirm this, but the difference between them is small. Also, wesee that there is an very small value in each of the histogram. 
+All three distributions show a skew to the left, i.e., more smaller donkeys. The medians being larger than the means confirm this, but the difference between them is small. Also, we see that there is an very small value in each of the histogram. 
 
 The skewed distributions suggest that we consider transformations of these variables. Symmetric distributions behave better in our formal analysis.
 
@@ -193,6 +191,10 @@ Let's now look at the outcome variable, `Weight`.
 
 ```{r}
 summary(donkeys$Weight)
+```
+
+
+```{r}
 ggplot(donkeys, aes(x = Weight, y = ..density..)) +
   geom_histogram(bins = 25)
 ```
@@ -215,19 +217,16 @@ Next, let's examine the relationship between variables.
 
 ## Bivariate summaries
 
-We want to examine both the relationship between the outcome variable and the other variables and between the explanatory variables.  The relationship between the outcome and explanatory variables give us an idea as to how these values vary together for donkeys. The relationship between the eplanatory
-
+We want to examine both the relationship between the outcome variable and the other variables and between the explanatory variables.  The relationship between the outcome and explanatory variables give us an idea as to how these values vary together for donkeys. 
 
 
 ```{r}
-pairs(donkeys[ , c("Weight", "Length", "Girth", "Height")])
+pairs(select(donkeys, Weight, Length, Girth, Height))
 ```
 
-The relationships between weight and the other quantitative variables are all highly correlated, with the relationship between girth and weight appearing to be the strongest.  
-We see that girth, height and length are also correlated so that any one of these variables captures a lot of the information in the others. 
+The relationships between weight and the other quantitative variables are all highly correlated, with the relationship between girth and weight appearing to be the strongest. We see that girth, height and length are also correlated so that any one of these variables captures a lot of the information in the others. 
 
 Let's examine the pairwise correlations.
-
 
 ```{r}
 cor(donkeys[, 4:7])
@@ -252,7 +251,7 @@ ggplot(donkeys, aes(y=Girth, x = Length)) +
 ```
 
 
-In addition to the quantitative variables, we can also examine the relatinship between weight and the categorical variables. We can compare histograms of weight for the different cateogries, or examine the quartiles and extremes of the subgroups of weight via boxplots.
+In addition to the quantitative variables, we can also examine the relationship between weight and the categorical variables. We can compare histograms of weight for the different categories, or examine the quartiles and extremes of the subgroups of weight via box plots.
 
 ### Qualitative variables and their association with weight
 
@@ -263,17 +262,16 @@ ggplot(donkeys) +
   geom_boxplot(aes(y = Weight, x = Sex))
 ```
 
-These three subgroups have are similar in median. The IQR for geldings is small in comparison to the others. The geldings may tend to weight more and be less variable in their weights?
+These three subgroups have are similar in median. The IQR for geldings is small in comparison to the others. The geldings may tend to weigh more and be less variable in their weights?
 
 *Implication* We can create an indicator variable that indicates whether the donkey is a gelding or not and use this in our analysis.
 
 ```{r}
-donkeys = mutate(donkeys, Gelding = Sex == "gelding")
+donkeys$Gelding = donkeys$Sex == "gelding"
 ```
 
 
-Next, we examine the distribution of weight for the various body conditions. 
-To do this, we need to convert BCS into a factor.
+Next, we examine the distribution of weight for the various body conditions. To do this, we need to convert BCS into a factor.
 
 
 ```{r}
@@ -283,22 +281,22 @@ ggplot(donkeys) +
 
 ```
 
-*Implication* The weight distribution appears to be shifter upward for each cateogry of body condition so we most likely want to use body condition as a variable and do not want to collapse the categories.  
+*Implication* The weight distribution appears to be shifted upward for each category of body condition so we most likely want to use body condition as a variable and do not want to collapse the categories.  
 
-We also examine the weight distrbituions for the age subgroups. 
+We also examine the weight distributions for the age subgroups. 
 
 ```{r}
 ggplot(donkeys) + 
   geom_boxplot(aes(y = Weight, x = Age))
 ```
 
-Notice that the orders of the age grops are all mixed up. This is because they are being plotted in alphabetical order. To fix this, we need to create an ordered factor.
+Notice that the orders of the age groups are all mixed up. This is because they are being plotted in alphabetical order. To fix this, we need to create an ordered factor.
 
 ```{r}
-donkeys = mutate(donkeys, Age = factor(Age, levels = c("<2", "2-5", "5-10", "10-15",    "15-20", ">20" ), ordered = TRUE))
+donkeys$Age = factor(donkeys$Age, levels = c("<2", "2-5", "5-10", "10-15",    "15-20", ">20" ), ordered = TRUE)
 ```
 
-Now we mkae our boxplot again.
+Now we make our box plot again.
 
 ```{r}
 ggplot(donkeys) + 
@@ -315,25 +313,12 @@ Age2 = as.character(donkeys$Age)
 Age2[Age2 == ">20" | Age2 == "15-20" | Age2 == "10-15"] = "10+"
 Age2 = factor(Age2, levels = c("<2", "2-5", "5-10", "10+"), ordered = TRUE)
 
-donkeys = mutate(donkeys, Age2 = Age2)
+donkeys$Age2 = Age2
 ```
 
 ### Transformation
 
-The scatter plots look elliptical, indicating that we may not need any transformations. 
-However, the long left tail in the distributions imply that we may want to move up the ladder of transformations, e.g., consider taking the square or cube transformation. We explore the square of girth.
-
-```{r}
-ggplot(donkeys, aes(x = Girth^2)) + geom_histogram()
-```
-
-```{r}
-cor(donkeys$Weight^2, donkeys$Girth^2)
-```
-
-The histogram appears somewhat improved. The correlation decreases when we square both girth and weight. 
-
-*Implication* Whether or not there is an improvement seems debatable. We don't necessarily want to make our decisions based only on correlations. Let's leave the variables untransformed for now. 
+The scatter plots look elliptical, indicating that we may not need any transformations. Let's leave the variables untransformed for now. 
 
 ## Model Fitting
 
@@ -343,7 +328,7 @@ Let's now try fitting a model to predict `Weight`. We include all of our variabl
 lm.all = lm(Weight ~ Height + Girth + Length + Age2 + Gelding + BCS, data = donkeys)
 ```
 
-The `lm.all object contains  a lot of information about the fit.
+The `lm.all` object contains  a lot of information about the fit.
 We can call `summary()` to see the coefficients and their standard errors, and also to assess the fit over all.
 
 ```{r}
@@ -354,23 +339,62 @@ summary(lm.all)
 We would like to fit the simplest model possible that still has good predictive properties.
 
 ```{r}
-library(leaps)
-leapsOut = regsubsets(Weight ~ Length + Girth + Height + Age2 + 
-                       Gelding + BCS, data = donkeys, nbest = 5, nvmax = 8,
-                   method = "exhaustive")
+models = vector(length = 7, mode = "character")
+vnames = c("Length", "Girth", "Height")
+rname = "Weight"
+
+models[1:3] = paste(rname, vnames, sep = " ~ ")
+k = 4
+
+for (i in 1:2){
+   for(j in (i+1):3) {
+   models[k] = paste(rname, 
+                     paste(vnames[i], vnames[j], sep = " + "), 
+                     sep = " ~ ")
+   k = k + 1
+   }}
+
+models[7] = paste(rname, paste(vnames, collapse = " + "), sep = " ~ ")
+models
+```
+
+
+```{r}
+MSE = sapply(models, function(x) {
+  summary(lm(as.formula(x), data = donkeys))$sigma^2
+})
 ```
 
 ```{r}
+modelShort = factor(
+  c("L", "G", "H", "L + G", "L + H", "G + H", "L + G + H"), 
+  levels = c("L", "G", "H", "L + G", "L + H", "G + H", "L + G + H"),
+  ordered = TRUE)
+ggplot(data = data.frame(model = modelShort, MSE), 
+       aes(x = model, y = MSE)) +
+  geom_col()
+```
+
+
+```{r}
+library(leaps)
+leapsOut = regsubsets(Weight ~ Length + Girth + Height, 
+                      data = donkeys, nbest = 3, nvmax = 8,
+                      method = "exhaustive")
+```
+
+```{r,eval=FALSE}
 summary(leapsOut)
 ```
 
-Notice that this is slightly problematic in that some of the models include the factor variables, but not all of their levels. 
 
-We do note that the best models are:
+Note that the best models are:
 
 * 1-variable: Girth
 * 2-variable: Girth + Length
 * 3-variable: Girth + Length + Width
+
+
 
 Let's try cross-validation to compare these 3 models.
 
@@ -399,7 +423,7 @@ tune(lm, Weight ~ Girth + Length + BCS + Age2, data = donkeys)
 
 Notice that BCS is the single best factor to add to this model.
 Also notice that Age in the presence of BCS improves the model.
-Model selection is an art. We wn't go further into it.
+Model selection is an art. We won't go further into it.
 
 *Choice* We will choose the model:
     Weight ~ Girth + Length + BCS + Age2
