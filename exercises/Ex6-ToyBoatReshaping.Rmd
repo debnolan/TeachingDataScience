@@ -1,0 +1,160 @@
+---
+title: "Toy Boat Exercises"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Introduction
+
+This notebook provides demos of many of the functions in tidyr for subsetting, joining, and grouping data frame. In particular we demonstrate how to
+
++ `select()` -- Create a subset of columns 
++ `filter()` -- Create a subset of rows  
++ `union()` -- Combine two data frames without duplicating rows
++ `setdiff()` -- Retain rows in one data frame that do not appear in another
++ `inner_join()` -- Join two data frames and retain only rows found in both
++ `left_join()` -- Join two data frames and retain only rows found in the left one
++ `group_by()` -- Group rows of a data frame according to the values of a variable in that data frame
++ `summarize()` -- Summarize grouped data into one record per group 
+
+
+## The Data
+
+These exercises use four small data frames to demonstrate how 
+to join and group data frames.
+
+```{r}
+load("../data/toyboat.rda")
+```
+
+There are four data frames: `sailor1`, `sailor2`, `boat`, `reservations`. We display each dat aframe as they are all small/toy examples
+```{r}
+sailor1
+```
+
+```{r}
+sailor2
+```
+
+```{r}
+boat
+```
+
+```{r}
+reservations
+```
+
+
+### Ex 1. Subset columns
+
+Create a subset of `sailor2` that contains only the `age` and `sid` columns.
+```{r}
+sub1 = select(sailor2, age, sid)
+sub1
+```
+
+
+### Ex 2. Subset rows
+
+Create a subset of `sailor2` that contains the sailors who
+have a rating higher than 8.
+```{r}
+sub2 = filter(sailor2, rating > 8)
+sub2
+```
+
+If we wanted only the names of these sailors, we can compose `select()` and `filter()` 
+```{r}
+select(filter(sailor2, rating > 8), sname)
+```
+
+
+## Joining and Grouping Data Frames
+
+For each of the following exercises, list what data frames need to be combined and sketch what the resulting data frame should look like,
+in particular what are the number of rows in the resulting data 
+frame and the main variables.
+
+Break the task into sub-tasks and use the verbs, select, filter, union, intersect, left_join, inner_join, group_by, and summarize to describe each action. Also specify the variables that will be used in these actions.
+
+
+
+### Ex 3. Union
+Combine the two sailor data frames (i.e., `sailor1` and `sailor2`) 
+into one data frame. Each sailor should appear only once.
+```{r}
+sailor3 = union(sailor1, sailor2, by = "sid")
+sailor3
+```
+
+## Ex 4. Joining data frames 
+Create a data frame that consists of the names of the sailors that are in `sailor1` and not in `sailor2`.
+```{r}
+sailor1not2 = setdiff(sailor1, sailor2, "sid")
+sailor1not2
+```
+
+
+## Ex 5. Joining and subsetting
+Create a data frame of the reservations of boat 103 that includes the sailor's name.
+```{r}
+reserve103 = filter(reservations, bid == 103)
+reserve103 = right_join(select(sailor3, sid, sname), 
+                        reserve103, by = "sid")
+
+reserve103
+```
+
+
+
+## Ex 6. Joining data frames 
+Create a data frame of the boats rented by sailors with high ratings (over 8). There should be one record per boat.
+```{r}
+bestRenters = filter(sailor3, rating > 8)
+bestRenters = left_join(bestRenters, reservations, by = "sid")
+bestRenters = group_by(bestRenters, bid)
+bestRenters = summarize(bestRenters, n = n())
+bestRenters
+```
+
+## Ex 7. Aggregating rows
+Create a data frame of the boat id, name, and the counts of the number of times each boat has been rented (no need to worry about boats that were not rented).
+```{r}
+rentalCount = left_join(reservations, boat, by = "bid")
+rentalCount = group_by(rentalCount, bid)
+rentalCount = summarize(rentalCount, bname = first(bname), n = n())
+rentalCount
+```
+
+
+## Ex 8. Joining three data frames
+Create a data frame that contains the sailor name, boat name, and the number of times the sailor has rented the boat.
+```{r}
+favoriteRentals = left_join(reservations, 
+                            select(boat, "bid", "bname"), 
+                            by = "bid")
+favoriteRentals2 = left_join(favoriteRentals, 
+                            select(sailor3, "sid", "sname"), 
+                            by = "sid")
+
+favoriteRentals3 = group_by(favoriteRentals2, bid, sid)
+
+favoriteRentals = summarize(favoriteRentals3, n = n(), 
+                            boat = first(bname),
+                            sailor = last(sname))
+
+favoriteRentals
+```

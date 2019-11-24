@@ -5,6 +5,12 @@ output:
   word_document: default
 ---
 
+```{r,include=FALSE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+```
+
 ## Roulette 
 
 The game of roulette involves spinning a wheel that has 38 slots, numbered 1 through 36 and 0 and 00. Also the 0 and 00 slots are green and the remaining 36 slots are evenly divided between red and black. 
@@ -13,15 +19,15 @@ A ball is tossed/released onto the spinning wheel, it bounces around, and eventu
 There are many types of bets you can place in the game. 
 In this exercise, we compare two types of bets and we also look at what happens when we bet different amounts.  
 
-1. Bet on Red: Betting on the ball landing in a red slot pays even odds. This means that if you bet $1 on Red and the ball lands on Red then you keep your $1 and the casino pays out $1. If the ball lands in any other color slot then you lose your $1.  
+1. Bet on Red: Betting on the ball landing in a red slot pays even odds. This means that if you bet 1-dollar on Red and the ball lands on Red then you keep your dollar and the casino pays out a dollar. If the ball lands in any other color slot then you lose your dollar.  
 
-2. Bet on #17: Betting on a particular number pays 35 to 1 so if you place a $1 bet on 17 and the ball lands on it, you keep your dollar and the casino pays out $35. If ball lands in any other slot then you lose your $1 bet.
+2. Bet on #17: Betting on a particular number pays 35 to 1 so if you place a dollar bet on 17 and the ball lands on it, you keep your dollar and the casino pays out 35 dollars. If ball lands in any other slot then you lose your bet.
 
-Of course you need not bet only $1, you may bet a larger amount. We will examine what happens when you place many $1 bets or fewer $100 bets.
+Of course you need not bet only 1 dollar, you may bet a larger amount. We will examine what happens when you place 100 1-dollar bets or one 100-dollar bet.
 
 ### Urn Model for a bet on red
 
-Create an urn that describes the possible outcome (gain or loss) from a $1 be on red.
+Create an urn that describes the possible outcome (gain or loss) from a dollar bet on red.
 
 * How many marbles are in the urn?
 * What are the different values that appear on the marbles?
@@ -33,7 +39,7 @@ Construct a vector, called `urn` that matches the answer to these questions.
 urn = c(rep(-1, 20), rep(1, 18))
 ```
 
-Use the `sample()` function to simulate 2,000 bets of $1 on red.
+Use the `sample()` function to simulate 2,000 bets of 1-dollar on red.
 Be sure to specify the arguments:
 
 + x
@@ -57,11 +63,17 @@ sd(samps)
 
 The expected gain is negative. We can expect to lose about 5 cents on every dollar we bet.  This is because there are 18 ways for the ball to land Red and 20 for it to land Black or Green, but the Bet is paid like it's fair (1 to 1), meanng the casino has an advantage.
 
+Note that the average gain in `samps` is close to the average of the values in the urn
+```{r}
+mean(urn)
+```
+The expected gain matches the average of the urn. Our average of `samps` is off by a little because it is based on random sampling, not a probability calculation.
+
 The SD is very close to 1. This makes sense because the two outcomes are +1 and -1 and the mean is close to 0 so the deviations are all a little more than 1 or a little less than 1.
 
 ### Urn Model for a bet on red
 
-Create a new urn called `urn17` that represents the win and loss from a $1 bet on number 17.  Simulate this bet 2000 times (assign the results to `samps17`) and find the average and SD of the results.
+Create a new urn called `urn17` that represents the win and loss from a 1-dollar bet on number 17.  Simulate this bet 2000 times (assign the results to `samps17`) and find the average and SD of the results.
 
   
 ```{r}
@@ -73,21 +85,29 @@ mean(samps17)
 sd(samps17)
 ```
 
-Again the expected value is small but negative. In fact, we expect to lose about a nickel on every $1 bet.
-However, the SD is about 5.7 for this bet.
+Again the expected value is small but negative. In fact, we expect to lose about a nickel on every dollar bet, just like with the bet on red.
+```{r}
+mean(urn17)
+```
+
+However, the SD is much larger for this bet. It's about 5.7. The true SD is the SD of the urn
+```{r}
+sd(urn17)
+```
+
 
 ## Repeated bets 
 
-Suppose you have $100, and you are considering whether to place:
+Suppose you have 100 dollars, and you are considering whether to place:
 
-  * 100 $1 bets on Red
-  * 100 $1 bets on 17
-  * 1 $100 bet on Red
-  * 1 $100 bet on 17
+  * 100 1-dollar bets on Red
+  * 100 1-dollar bets on 17
+  * 1 100-dollar bet on Red
+  * 1 100-dollar bet on 17
   
 For each of these options simulate 10,000 rounds and assign the outcome to samps100.red, samps100.17, samps1big.red and samps1big.17.
 
-###  Simulate 100 $1 bets on Red
+###  Simulate 100 1-dollar bets on Red
 
 We will get you started. For each round of 100 bets, we are interested in the total winnings, i.e., the sum of the net gain.
 Below we compute this quantity for one round
@@ -95,22 +115,23 @@ Below we compute this quantity for one round
 ```{r}
 sum(sample(urn, 100, replace = TRUE))
 ```
+Rerun the above code chunk a few times to see what the possible values might be. 
 
-Now use the `replcate()` function to repeat this 10,000 times.
+Below we use the `replicate()` function to repeat this random process 10,000 times.
 ```{r}
 samps100.red = replicate(10000, 
                          sum(sample(urn, 100, replace = TRUE)))
 ```
 
 
-###  Simulate 100 $1 bets on #17
+###  Simulate 100 1-dollar bets on #17
 
 ```{r}
 samps100.17 = replicate(10000, 
                          sum(sample(urn17, 100, replace = TRUE)))
 ```
 
-###  Simulate 1 $100 bet on red
+###  Simulate one 100-dollar bet on red
 
 Note that we simply need to scale the urn we created and make one bet.
 
@@ -120,7 +141,7 @@ samps1big.red = replicate(10000,
                   sum(sample(urn100.red, 1, replace = TRUE)))
 ```
 
-### Simulate 1 $100 bet on #17
+### Simulate one 100-dollar bet on #17
 
 
 ```{r}
@@ -130,80 +151,57 @@ samps1big.17 = replicate(10000,
 ```
 
 
-### Compare the average gain
+### Compare the average and SD in gain
 
-```{r}
-mean(samps100.red)
-mean(samps100.17)
-mean(samps1big.red)
-mean(samps1big.17)
-```
-
-All four types of bets have the same expected value: -$5.26.
-Your simulation might show slight deviations from this because afterall it is a simulation.
-
-### Compare the standard deviation in gain
-
-```{r}
-sd(samps100.red)
-sd(samps100.17)
-sd(samps1big.red)
-sd(samps1big.17)
-```
-
-These betting schemes have very different SDs. The smallest SD is when we bet $1 at a time on Red. The fluctuations around -$5 are about $10.  
-
-The other SDs are much bigger. Can you reason why?
-
-Placing a single $100 has a much larger SD than 100 smaller bets. If we place it on Red then the SD is about $100. This makes sense because we are either going to win $100 or lose $100 in one bet, and the chances of winning/losing are nearly equal.
-
-The single $100 bet on number 17 has the largest SD: over $570. We have a small chance of getting $3500 and a large chance of losing $100. Those are the only possible outcomes. 
-
-### Compare their probability histograms 
-
+We first collect our simulation results into a data frame.
 ```{r}
 bets = data.frame(gains = c(samps100.red, samps100.17, 
                             samps1big.red, samps1big.17),
-                  type = rep(c("red.1", "No17.1", "red.big", "no17.big"), each = length(samps100.red)))
+                  type = rep(c("red.1dollar", "No17.1dollar",
+                               "red.1big", "no17.1big"), 
+                             each = length(samps100.red)))
 ```
+
+Then we group them by bet type, and summarize each group of bets with mean and sd.
+
+```{r}
+groupBets = group_by(bets, type)
+summarize(groupBets, avgGain = mean(gains), sdGain = sd(gains))
+```
+
+All four types of bets have the same expected value: -5.26.
+Your averages might show slight deviations from this amount because it is a simulation. The variation we see is very different SDs. The smallest SD is when we bet 1 dollar at a time on Red. The fluctuations around -5 are about 10.  
+
+The other SDs are much bigger. Can you reason why?
+
+Placing a single 100-dollar has a much larger SD than 100 smaller bets. If we place it on Red then the SD is about 100. This makes sense because we are either going to win 100 or lose 100 dollars in one bet, and the chances of winning/losing are nearly equal.
+
+The single 100-dollar bet on number 17 has the largest SD: over 570. We have a small chance of getting 3500 dollars and a large chance of losing 100 dollars. Those are the only possible outcomes. 
+
+### Compare the probability histograms for gain 
 
 
 ```{r}
-plot(table(samps100.red), 
-     xlab = "Net Gain", ylab = "Count", 
-     main ="Place $1 on Number 17 for 100 Bets",
-     type = "h")
-
+ggplot(bets, aes(x = gains)) +
+  geom_histogram(bins = 20) + 
+  facet_wrap(~ type, scales = "free")
 ```
 
+What do you see in these plots that you don't see by simply computing the approximate expected value and SD of this random process?  
 
-What do you see in these plots that you don't see by simply computing the expected value and SD of this random process?  
-
-The probability histogram for the net gain from the 100 bets of $1 on Red looks approximately normal.  The histogram for the 100 bets on 17 looks skew right, here the chance of a win is small and there are a large number of bets.  
-Finally, the histograms for the single $100 bets show that there are  only two possible outcomes.
+The probability histogram for the net gain from the 100 bets of 1 dollar on Red looks approximately normal.  The histogram for the 100 bets on 17 looks skew right, because the chance of a win is small and there are a large number of bets. Finally, the histograms for the single 100-dollar bets show that there are  only two possible outcomes.
 
 ### Different goals 
 
 Use  the simulation results to estimate the chance that you:
 
-  * Lose less than $10
-  * Win more than $400
-  
+  * Lose less than 10 dollars
+  * Win more than 400 dollars
+
 ```{r}
 n = length(samps100.red)
-sum(samps100.red > -10 )/n
-sum(samps100.17 > -10)/n
-sum(samps1big.red > -10 )/n
-sum(samps1big.17 > -10)/n
-
-sum(samps100.red > 400 )/n
-sum(samps100.17 > 400)/n
-sum(samps1big.red > 400 )/n
-sum(samps1big.17 > 400)/n
+summarize(groupBets, lose10 = sum(gains > -10)/n,
+          winBig = sum(gains > 400)/n)
 ```
 
-For the two bets on Red and the 100 bets on #17, the chance of losing less than $10 ranges between 47% and 65%.  The $100 bet on 17 only has a chance of about 2.5% of losing less than $10.
-
-On the other hand, in the 10,000 simulations of these three bets (the two Red bets and the 100 bets on #17), none of them ended up with a net gain greater than $400.  
-In fact, it's not possible in the two types of bets on Red to win more than $100.  
-Howver, if you win at all in the $100 bet on #17, then you win big so your chance is also 2.5% that you win more than $400.
+For the two bets on Red and the 100 bets on #17, the chance of losing less than 10-dollars ranges between 47% and 65%.  The 100-dollar bet on 17 only has a chance of about 2.5% of losing less than 10 dollars. On the other hand, in the 10,000 simulations of these three bets (the two Red bets and the 100 bets on #17), none of them ended up with a net gain greater than 400. In fact, it's not possible in the two types of bets on Red to win more than 100. As for the 100 bets of a dollar on 17, we need to win at least 14 times for the net gain to exceed 400. This is such a rare event that we do not observe it in our 10,000 simulations. So while the chance is not 0, we would estimate it at less than 1 in 10,000.  Fially, if you win at all in the 100-dollar bet on #17, then you win big so your chance is 2.5% that you win more than 400 dollars (the same chance of losing less than 10 dollars).

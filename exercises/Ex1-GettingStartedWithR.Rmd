@@ -22,7 +22,8 @@ There are 2 basic kinds of expressions:
 sample(7)
 ```
 
-Function-style expressions can have a side effect, such as making a plot
+Function-style expressions can have a side effect, 
+such as making a plot
 
 ```{r}
 plot(pressure)
@@ -101,8 +102,7 @@ y = x
 x
 y
 ```
-Again, `y` continues to have the value 3 after
-`x`'s value has changed.
+Again, `y` continues to have the value 3 after `x`'s value has changed.
 
 ```{r}
 x = 10
@@ -111,14 +111,14 @@ y
 ```
 
 
-
+Consider the following expressions.
 ```{r}
 z = 2
 x = z * y
 y = x
 ```
 
-What are the values in `x`, `y`, and `z`?
+What are the values in `x`, `y`, and `z` after evaluating the above expressions?
 ```{r}
 x
 y
@@ -127,11 +127,9 @@ z
 
 ## Compound Expressions
 
-Compound expressions occur when we compse functions by providing the 
-return value of one function as the input for another.
+Compound expressions occur when we compose functions, i.e., we provide the return value from one function as the input for another.
 
 Below are a few examples.
-
 ```{r}
 abs(z - x)
 
@@ -162,50 +160,18 @@ head(x, n = 6L, ...)
 head(x, n = 6L, ...)
 ```
 
+The `n` argument has a default value of 6, which means that we don't need to specify the value for this argument, if the default value
+is what we want.  No default is provided for `x` so we must provide a value for this argument when we call the function. 
 
-### Return the First or Last Part of an Object
-
-#### Description
-
-Returns the first or last parts of a vector, matrix, table, data frame or function. Since head() and tail() are generic functions, they may also have been extended to other classes.
-
-#### Usage
-```
-head(x, ...)
-## Default S3 method:
-head(x, n = 6L, ...)
-## S3 method for class 'data.frame'
-head(x, n = 6L, ...)
-## S3 method for class 'matrix'
-head(x, n = 6L, ...)
-## S3 method for class 'ftable'
-head(x, n = 6L, ...)
-## S3 method for class 'table'
-head(x, n = 6L, ...)
-## S3 method for class 'function'
-head(x, n = 6L, ...)
-```
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-The `n` argument has a default value of 6, which means that we don't need
-to specify the value for this argument, if the default value
-is what we want.  No default is provided for `x` so 
-we must provide a value for this argument when we call the function. 
-
-These arguments provide information to the function on 
-how to perform the computations. According to the documentation for 
-the `head` function, the default value of 6 for `n` indicates that 
-the first 6 elements of the object provided via the `x` argument are to be printed to the console. 
-Let's try calling `head` with the `precip` object,
-
+ 
+Let's try calling `head` with the `precip` object
 
 ```{r}
 head(precip)
 ```
 
 The return value is the first 6 values in `precip`. 
-We can print the first 3 elements of `precip` instead, by specifying that
-the argument `n` is 3. We can do this with any of the
+We can print the first 3 elements of `precip` instead, by specifying that the argument `n` is 3. We can do this with any of the
 following function calls
 
 ```{r, collapse=TRUE}
@@ -213,21 +179,14 @@ head(precip, 3)
 head(precip, n = 3)
 ```
 
-R is very flexible in allowing us to call the function in many different ways.
-If we do not provide the argument names then it uses the sequence of the
-values in the function call to assign these values to the arguments. 
-If we use an argument name, then the value provided
+R is very flexible in allowing us to call the function in many different ways. If we do not provide the argument names then it uses the sequence of the values in the function call to assign these values to the arguments.  If we use an argument name, then the value provided
 is assigned to that named argument, e.g., with `head(precip, n = 3)` 
-the argument `n` is assigned the value of 3 and the unnamed argument value
-`precip` is matched by position to the remaining argument(s), i.e., to `x`.  
+the argument `n` is assigned the value of 3 and the unnamed argument value `precip` is matched by position to the remaining argument(s), i.e., to `x`.  
 
 It's a good idea to use argument names. Typically, we don't provide
-the name of the first argument, which is often required, and we do provide
-the names for the remaining arguments. In other words, the typical function
-call is `head(precip, n = 3)`.
+the name of the first argument, which is often required, and we do provide the names for the remaining arguments. In other words, the typical function call is `head(precip, n = 3)`.
 
-There are a few more details about calling functions, which we will return
-to later.
+There are a few more details about calling functions, which we will return to later.
 
 
 

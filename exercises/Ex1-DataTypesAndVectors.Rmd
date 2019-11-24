@@ -1,14 +1,16 @@
 ---
 title: "Data Types and Vectors"
 output:
-  word_document: default
+  html_document:
+    df_print: paged
   pdf_document: default
+  word_document: default
 ---
 
 
 ## Assignment
 
-Recall, if we want to save the return value to use in another calculation, we assign it to a **variable**. For example,
+If we want to save the return value to use in another calculation, we assign it to a **variable**. For example,
 
 ```{r}
 x = 10 ^ (15 / 3 - 2)
@@ -37,12 +39,11 @@ Variables allow us to:
 
 ## Data Types
 
-R has a number of built-in data types.  The three most basic types are numeric, character, and logical vectors. 
-There is no such thing as a scalar in *R*.
+*R* has a number of built-in data types.  The three most basic types are numeric, character, and logical vectors. There is no such thing as a scalar in *R*; that is, a single value is a vector of length 1.
 
 A vector is an *ordered* container *primitive elements* of the same type.
 
-We have data on the weather in Port Elizabeth. These are monthly figures for minimum temperature, maximum temperature, precipitation, hours of sunshine (8 or more hours a day), water temperature (comfort lavel), and month. What are the data types?
+We have data on the weather in Port Elizabeth. These are monthly figures for minimum temperature, maximum temperature, precipitation, hours of sunshine (8 or more hours a day), water temperature (comfort level), and month. 
 
 We load the data with 
 ```{r}
@@ -64,8 +65,7 @@ precip
 sun8
 swim
 ```
-There are some obvious differences between them.
-We will explore more about these differences.
+There are some obvious differences between them. We will explore more about these differences.
 
 We can examine the data types and the summary statistics for each of these by calling `class()` and `summary()`, e.g.,
 ```{r}
@@ -86,9 +86,7 @@ summary(sun8)
 ```
 Notice that the `summary()` function provides different responses depending on the type of data. In the case of logical vectors, it gives a simple count of the number of TRUEs and FALSEs.
 
-A factor vector is a special storage class used for qualitative data.
-The values are internally stored as integers, but each integer corresponds to a level or categoy. 
-The categories have labels that are character strings.
+A factor vector is a special storage class used for qualitative data. The values are internally stored as integers, but each integer corresponds to a level or category. The categories have labels that are character strings.
 ```{r}
 class(swim)
 levels(swim)
@@ -124,7 +122,7 @@ sd(maxTemp)
 
 Here are some examples of functions that return vectors the same length as the input vector.
 
-Convert `precip` from milimeters to centimeters:
+Convert `precip` from millimeters to centimeters:
 
 ```{r}
 precip / 10
@@ -156,21 +154,15 @@ The `plot()` function has a plot as a side effect
 plot(maxTemp, type ="l")
 ```
 
-The `lm()` function fits a least squares line to data and return an `lm` object,
-which is a kind of list that has a lot of information relevant to the fit.
+The `lm()` function fits a least squares line to data and return an `lm` object, which is a kind of list that has a lot of information relevant to the fit.
 ```{r}
 lm.out = lm(precip ~ maxTemp)
 class(lm.out)
 names(lm.out)
 ```
-Don't worry if you don't know what a least squares line is.
-We're only using it as an example.
+Don't worry if you don't know what a least squares line is. We're only using it as an example.
 
-We can call `plot()` with the `lm` object.
-We can call `summary()` with the `lm` object.
-We can call `predict()` with the `lm` object.
-And, we can access various elements of the `lm` object to further
-analyze the result of the linear fit.
+We can call `plot()` with the `lm` object. We can call `summary()` with the `lm` object. We can call `predict()` with the `lm` object. And, we can access various elements of the `lm` object to further analyze the result of the linear fit.
 
 ```{r, FALSE}
 plot(lm.out)
@@ -179,21 +171,20 @@ summary(lm.out)
 
 ## Logical Operations
 
-Often we want to compare the elements in a vector to see if they are equal to, greater than, less than, etc. to a particular value.
+Often we want to compare the elements in a vector to a benchmark to see if they are equal to, greater than, less than, etc. to the benchmark value.
 
-For example, we can determine how many months have at least 250 hours of sunshine
+For example, we can determine how many months have at least 250 hours of sunshine as follows.
 ```{r}
 over250 = sunshine >= 250
 over250
 ```
 
-We can find how many months have warm water for swimming 
+We can find how many months have warm water for swimming with: 
 ```{r}
 swim == "warm"
 ```
 
-Two aggregator functions that are useful with logical vectors are `all()` and `any()`. The first returns `TRUE` if all elements in
-the logical vector or `TRUE`. The `any()` function returns `TRUE` if and of the elements in the input vector are `TRUE`.
+Two aggregator functions that are useful with logical vectors are `all()` and `any()`. The first returns `TRUE` if all elements in the logical vector or `TRUE`. The `any()` function returns `TRUE` if and of the elements in the input vector are `TRUE`.
 ```{r}
 all(over250)
 any(over250)
@@ -202,9 +193,7 @@ We see that not all of the months have at least 250 hours of sunshine, but some 
 
 ## Boolean Operations
 
-At times we want to operate on two or more logical vectors.
-For example, we may want to determine whether ther are months with
-over 8 hours of sunshine and warm water. 
+At times we want to operate on two or more logical vectors. For example, we may want to determine whether there are months with over 8 hours of sunshine and the water is warm. 
 ```{r}
 sun8 & (swim == "warm")
 ```
@@ -219,10 +208,10 @@ sun8 | (swim == "warm")
 
 It can be useful to create vectors to assist with statistical analyses. We demo some of the ways to do this.
 
-The simplest approach is to create vectors whose elements are 1-apart.
+The simplest approach is to create a vector of numbers that are 1-apart.
 ```{r}
 1:5
--10:-7
+-7:-10
 ```
 
 The `seq` function is more sophisticated version of `:`
@@ -238,30 +227,27 @@ x = c(1, 20, 0, NA, Inf)
 x
 ```
 
-We can concatenate vectors together into one long vector, e.g.,
+We can concatenate multiple vectors together into one long vector, e.g.,
 ```{r}
 c(minTemp, maxTemp)
 ```
 
-And the `rep()` function. Can you figure out what each is doing? 
+And the `rep()` function repeats values a given number of times. Can you figure out what each call to `rep()` is doing in the code below? 
 ```{r}
 rep(x, each = 2)
 rep(x, times = 2)
 ```
 And
-```{r, eval=FALSE}
+```{r}
 rep(x, times = c(3, 1, 5, 0, 2))
 ```
 
 
 ## Special Values
 
-We put a couple of special characters into the `x` vector that we created earlier. 
-Let's see what happens when we work with them. 
+We put a couple of special characters into the `x` vector that we created earlier. Let's see what happens when we work with them. 
 
-First, let's add 2 to each element of `x`. Before we do this, what do you think might happen when we try to add 2 to an `NA` value?  `NA` stands for Not Available. If we add 2 to a value
-that is not available, then is the new value still not available?
-What about adding 2 to infinity?
+First, let's add 2 to each element of `x`. Before we do this, what do you think might happen when we try to add 2 to an `NA` value?  `NA` stands for Not Available. If we add 2 to a value that is not available, then is the new value still not available? What about adding 2 to infinity?
 ```{r}
 2 + x
 ```
@@ -273,7 +259,7 @@ What do you think the average of the elements in `x` should be?
 mean(x)
 ```
 
-What happens when we compare `x` to 37, i.e., which elements in `x` are less than 37.
+What happens when we compare `x` to 37, i.e., which elements in `x` are less than 37?
 ```{r}
 x < 37
 ```
@@ -284,8 +270,7 @@ x < 37
 As we described early, *R* works with vectors.
 We can add and subtract vectors and multiply and divide them.
 
-We provide some examples.
-We can find the differernce between the max and min monthly temperatures with 
+We provide some examples. We can find the difference between the max and min monthly temperatures with 
 ```{r}
 maxTemp - minTemp
 ```
@@ -298,16 +283,13 @@ minTemp * precip
 
 ## Coercion 
 
-What happens in the following multipliclation
+What happens in the following multiplication
 ```{r}
 precip * sun8
 ```
-Here We have asked *R* to multiply a numeric vector with a logical vector.
-*R* coerces the logical vector into a numeric vector of 0s and 1s to perform the operation.
+Here, we have asked *R* to multiply a numeric vector with a logical vector. *R* coerces the logical vector into a numeric vector of 0s and 1s to perform the operation.
 
-Cercing a logical vector to 0s and 1s can be very useful.
-For example, describe in words what each of the return values is
-for the following function calls
+Coercing a logical vector to 0s and 1s can be very useful. For example, describe in words what each of the return values is for the following function calls
 ```{r}
 sum(sun8)
 
@@ -315,20 +297,17 @@ sum(maxTemp * sun8) / sum(sun8)
 ```
 
 
-What happens in the following concatentation:
+What happens in the following concatenation:
 ```{r}
 c(maxTemp, mon)
 ```
 This time *R* coerced the ages into character strings.
 
-A vector must have homogenous elements.
-How does *R* decide which data type to coerce?
-Well, *R* can't coerce "Jan" or "Mar" into a number so it
-chooses to coerce 25 and 24 into strings.
+A vector must have homogeneous elements. How does *R* decide which data type to coerce? Well, *R* can't coerce "Jan" or "Mar" into a number so it chooses to coerce 25 and 24 into strings.
 
 ## Recycling
 
-What is happening in the following:
+Can you figure out what is happening in the following addition?
 ```{r}
 precip
 precip + (1:6)
@@ -336,9 +315,7 @@ precip + (1:6)
 *R* *recycles* the values in the shorter vector to match the length of the longer vector and then performs the summation.
 
 
-What happens when the shorter vector is not an integer multiple of the longer one?
-Try it and find out
-
+What happens when the shorter vector is not an integer multiple of the longer one? 
 ```{r}
 precip + (1:7)
 ```

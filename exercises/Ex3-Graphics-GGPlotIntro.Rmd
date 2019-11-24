@@ -9,7 +9,7 @@ output:
 
 ## Prepare
 
-If you haven't done so already, install the ggplot package (and dependencies). Then, load it into your workspace with:
+If you haven't done so already, install the `ggplot2` package (and dependencies). Then, load it into your workspace along with the `dplyr` package.
 ```{r}
 require(dplyr)
 require(ggplot2)
@@ -22,7 +22,7 @@ load("../data/babies.Rda")
 ```
 
 We examine just the babies born to mothers who never smoked and mothers who smoked while pregnant. We use the `filter()` function in the 
-`dplyr` package to select the rows.
+`dplyr` package to select the rows in the data frame that correspond to these mothers.
 
 ```{r}
 babies2 = filter(babies, smoke == "Never" | smoke == "Current")
@@ -34,46 +34,46 @@ babies2 = filter(babies, smoke == "Never" | smoke == "Current")
 
 ### The ggplot object
 
-A call to `ggplot()` creates a plot object, which it need not print. Below we assign a call to `ggplot()` to the variable `bwtPlot`.
+A call to `ggplot()` creates a plot object. Below we assign a call to `ggplot()` to the variable `bwtPlot`. Notice that it has no data or variables to plot specified.
 
 ```{r}
 bwtPlot = ggplot()
 ```
 
-Notice we have no plot as a side effect.
-We created the ggplot object, but we didn't even give it any data.
 
 ### The Data
 
-ggplot only accepts data in data frames. If you have two vectors that you want to make a scatter plot from, then you must put them into a data frame.
+`ggplot` accepts data only in data frames. If you have two vectors that you want to make a scatter plot from, then you must put them into a data frame.
 
 ### The Aesthetic Mapping
 
-The aesthetic mapping connects variables in a data frame to a feature of the plot, such as `x` and `y` locations, `color`, and `size`. As an example, the aesthetic: `aes(x = ht, y = bwt, color = smoke)` for the babies data, maps mother’s height to the x-axis, birth weight to the y-axis, and uses color to denote smoking status.
+The aesthetic mapping connects variables in a data frame to a feature of the plot, such as `x` and `y` locations, `color`, and `group`. As an example, the aesthetic: `aes(x = ht, y = bwt, color = smoke)` for the babies data frame, maps mother’s height to the x-axis, birth weight to the y-axis, and uses color to denote smoking status.
 
 ### The Layer
 
 A plot is made in layers. Each layer must have a data frame and aesthetic mapping (with a few exceptions).
 
-We can build the plot by adding layers to the plot object.
+We can build plots by adding layers to the plot object.
 
-For example, we can make a scatter plot by adding a layer of points to the plot. We do this with:
+For example, we can make a scatter plot by adding a layer of points to the plot object `bwtPlot` that we created earlier. We do this with:
 ```{r fig.width=5,fig.height=3}
-bwtPlot + geom_point(data = babies2, 
-                 mapping = aes(x = ht, y = bwt, color = smoke))
+bwtPlot + 
+  geom_point(data = babies2, 
+             mapping = aes(x = ht, y = bwt, color = smoke))
 ```
 
 It's that easy!
 Notice the `x` axis is mother's height, the `y` axis is 
 birthweight, and the points are colored according to the mother's smoking status. The aesthetic mapping was used to specify 
-the points, i.e., the mapping gave the x-coordinate, y-coordinate, and color 
-of each poing
+the points, i.e., the mapping gave the x-coordinate, y-coordinate, and color of each point.
 
 ### More Layers
 
-We can add more layers to the plot. That's the paradigm.
+We can add more layers to the plot. 
 For example, we can add fitted regression lines, 
-one for each group of mothers (current and never smokers) with:
+one for each group of mothers (current and never smokers).
+We use the `geom_smooth()` layer to do this. Note that we also jitter the points to reduce problems with overplotting.  We can jitter by replacing `geom_point()` with `geom_jitter()` or by adding a `location = "jitter"` argument to `geom_point()`.
+
 
 ```{r fig.width=5,fig.height=3}
 bwtPlot + 
@@ -94,18 +94,15 @@ Then, we don't need to specify it in each of the layers.
 Even when specified in a `ggplot()`, it is still possible to 
 override this specification in a layer.
 
+We remake the previous plot to show the simplicity.
+
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, 
        mapping = aes(x = ht, y = bwt, color = smoke)) +
-  geom_point() +
+  geom_jitter() +
   geom_smooth(method='lm', se = FALSE)
 ```
 
-Notice that in the `geom_smooth()` layer we used the 
-mapping specified earlier in `ggplot()` and we added one more
-mapping of the group aesthetic to smoking status. 
-This aesthetic indicates that we want the smooth to be done in groups
-so that we have separate lines for the never and current smokers.
 
 ## Some Plot Examples
 
@@ -113,8 +110,9 @@ There are many kinds of plots that we can make with `ggplot()`.
 We show a few of the basics here:
 
 
-
 ### Histogram
+
+Below we make a histogram. If we don't specify the y aesthetic, then the y-axis will be counts. The value of the y attribute is a variable that ggplot makes available to us (the .. prefix and suffix identify it as a supplied variable).
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, 
@@ -125,6 +123,9 @@ ggplot(data = babies2,
 
 ### Box plot
 
+We make a set of boxplots of birthweight by education.
+The x aesthetic needs to be a factor to create these boxplots.
+
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = filter(babies2, !is.na(ed)), 
        mapping = aes(x = ed, y = bwt)) +
@@ -132,7 +133,10 @@ ggplot(data = filter(babies2, !is.na(ed)),
 ```
 
 
+
 ### Bar Chart
+
+Below is a ggplot call to create a bar chart for education. Note that the color and fill arguments to `geom_bar` are not aesthetic mappings. They simply specify the appearance of the bars in the chart.
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, 
@@ -168,26 +172,20 @@ ggplot(data = babies, aes(x = bwt)) +
                  alpha = 0.4, col = "red")
 ```
 
-*IMPORTANT*: the color argument in the `geom_histogram()` function call is not the same as the color argument to the aesthetic call `aes()`. The color specification of red simply says that we want
-to change the appearance of the histogram. It is not doing any aesthetic mapping.
+*IMPORTANT*: the color argument in the `geom_histogram()` function call is not the same as the color argument to the aesthetic call `aes()`. The color specification of red simply says that we want to change the appearance of the histogram. It is not doing any aesthetic mapping.
 
 
 ### Scales
 
-The `scale_XXX()` functions control the scales of data components in a plot. That is, they connect the scale of the data values to
-the aesthetic space. 
-
-These scale layers include:
+The `scale_XXX()` layers control the scales of data components in a plot. That is, they connect the scale of the data values to
+the aesthetic space.These scale layers include:
 
 + x and y axis scale for specifyig the limits and labels for axes
 + color palettes for the color scale
 
 These specifications are observed in the plot via the axes and legends.
  
-Below we adjust all three scales: the `x`, `y`, and `color`.
-For the `x` scale, we provide a title (name) for the axis and the 
-endpoint limits.
-For the color scale, we provide a different palette (black and red) and more informative labels for these colors.
+Below we adjust all three scales: the `x`, `y`, and `color`. For the `x` scale, we provide a title (name) for the axis and the endpoint limits. For the color scale, we provide a different palette (black and red) and more informative labels for these colors.
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
@@ -198,8 +196,7 @@ ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
                      labels = c("Never Smoker", "Current Smoker"))
 ```
 
-Changing the axis labels and plot title are so common that short cut functions that are simpler to call have been provided.
-See for example, the plot below where we specify the axis labels and plot title with a call to `labs()` rather than `scale`.
+Changing the axis labels and plot title are so common that short cut functions that are simpler to call have been provided. See for example, the plot below where we specify the axis labels and plot title with a call to `labs()` rather than `scale`.
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
@@ -216,22 +213,15 @@ ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
 
 ### Themes
 
-The `theme()` changes the over appearance of the plot.
-That is, it customizes the non-data components of the plot,
-such as titles, labels, fonts, background gridlines, legends,
-and more. 
+Themes change the over appearance of a plot. That is, a theme customizes the non-data components of the plot, such as titles, labels, fonts, background gridlines, legends, and more. 
 
-Themes can give plots a consistent customized look to your plots.
-It is possible to change small aspects of the appearance of a plot, or to adopt a "whole new" theme. 
+Themes can give plots a consistent customized look to your plots. It is possible to change small aspects of the appearance of a plot, or to adopt a "whole new" theme. 
 
-Below we change the 
-theme to one that is good for black and white renderings.
-We save the current (active) theme as we set the new one, and then
-we restore the old one after making the plot.
+Below we change the theme to one that is good for black and white renderings. 
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies, aes(x = bwt)) +
-  geom_histogram(aes( y = ..density..), 
+  geom_histogram(aes(y = ..density..), 
                  breaks=c(50, seq(70, 170, by=2), 180) ,
                  alpha = 0.4, col = "red") +
   theme_bw()
@@ -241,9 +231,7 @@ pale grey rather than white.
 
 The `theme()` function gives us a lot of control in tweaking the
 appearance of the non-data components. For example, we can change 
-the font family, font color, and type of the legend text.
-Below is a plot that uses `theme()` to control the placement of the 
-legend. It also adopts the "classic" theme so that the plot looks like a base R plot.
+the font family, font color, and type of the legend text. Below is a plot that uses `theme()` to control the placement of the legend. It also adopts the "classic" theme so that the plot looks like a base R plot.
 
 ```{r, fig.width=5,fig.height=3}
 ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
@@ -252,15 +240,6 @@ ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
   theme_classic()
 ```
 
-Changing the axis labels and plot title are so common that short cut functions that are simpler to call have been provided.
-See for example, the plot below where we augment the above plot with
-labels.
-
-```{r, fig.width=5,fig.height=3}
-ggplot(data = babies2, aes(x = ht, y = bwt, color = smoke)) +
-  geom_jitter(width = 0.5, size = 0.75, alpha = 0.8, na.rm = TRUE) +
-  theme(legend.position = c(0.1, 0.9)) 
-```
 
 ### Annotations
 
@@ -284,14 +263,9 @@ ggplot(data = babies, aes(x = bwt)) +
 
 We can use `facet()` to juxtapose plots of subsets of the data.
 That is, we want panels of the same type of plot for different 
-groups of data, where these groupos are determined by categories of a variable.
-This sort of plot is called a facet plot. 
+groups of data, where these groups are determined by categories of a variable. This sort of plot is called a facet plot. 
 
-Below we make two panels, one for each type of smoker.
-Each panel is a scatter plot of birth weight on height.
-Notice the code is very similar to an earlier scatter plot
-that superposes these two groups of mothers and uses color to
-distringuish between them.
+Below we make two panels, one for each type of smoker. Each panel is a scatter plot of birth weight on height. Notice the code is very similar to an earlier scatter plot that superposes these two groups of mothers and uses color to distringuish between them.
 
 ```{r, fig.width=6,fig.height=3}
 bwtPlot = ggplot(data = babies2, 
