@@ -7,7 +7,7 @@ Time | Topic |  Exercises and Demos
 ------------ | -------------  | --------
 9 - 10 | Introduction  Computing | [Ex1-GettingStartedWithR](./exercises/Ex1-GettingStartedWithR.Rmd)
   &nbsp;     |   &nbsp;     | [Ex1-DataTypesAndVectors](./exercises/Ex1-DataTypesAndVectors.Rmd)
-10 - 11 | Simulation and Testing  |  [Ex2-BloodPressureExpt](./exercises/BPExptTest.Rmd)
+10 - 11 | Simulation and Testing  |  [Ex2-BloodPressureExpt](./exercises/Ex2-BPExptTest.Rmd)
   &nbsp;     |   &nbsp;     | [Ex2-RouletteSimulation](./exercises/Ex2-RouletteSimulation.Rmd)
 11:00-11:30 |	BREAK  | &nbsp;
 11:30-12:40 |	Visualization	 | [Ex3-Graphics-GGPlotIntro](./exercises/Ex3-Graphics-GGPlotIntro.Rmd)	
