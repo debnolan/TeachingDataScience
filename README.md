@@ -11,7 +11,7 @@ Time | Topic |  Exercises and Demos
   &nbsp;     |   &nbsp;     | Ex2-RouletteSimulation
 11:00-11:30 |	BREAK  | &nbsp;
 11:30-12:40 |	Visualization	 | Ex3-Graphics-GGPlotIntro	
- & nbsp;  | &nbsp; | Ex3-BikeShareGraphics
+ &nbsp;  | &nbsp; | Ex3-BikeShareGraphics
 12:40-13:15	 | Bootstrapping	|	Ex4-KleiberBootstrap	
 13:15-14:00 | 	LUNCH	 | &nbsp;		
 14:00-14:30 |	 &nbsp; |  Ex4-waitTimeBootstrap 
