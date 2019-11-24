@@ -1,37 +1,31 @@
 ## Teaching Data Science Workshop
 
-You can use the [editor on GitHub](https://github.com/debnolan/TeachingDataScience/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Agenda
 
-### Markdown
+Time | Topic |  Exercises and Demos
+------------ | -------------  | --------
+9 - 10 | Introduction  Computing | Ex1-GettingStartedWithR
+  &nbsp;     |   &nbsp;     | Ex1-DataTypesAndVectors
+10 - 11 | Simulation and Testing  |  Ex2-BloodPressureExpt
+  &nbsp;     |   &nbsp;     | Ex2-RouletteSimulation
+11:00-11:30 |	BREAK  | &nbsp;
+11:30-12:40 |	Visualization	 | Ex3-Graphics-GGPlotIntro	
+ & nbsp;  | &nbsp; | Ex3-BikeShareGraphics
+12:40-13:15	 | Bootstrapping	|	Ex4-KleiberBootstrap	
+13:15-14:00 | 	LUNCH	 | &nbsp;		
+14:00-14:30 |	 &nbsp; |  Ex4-waitTimeBootstrap 
+14:30-15:00 |	Data Science Life Cycle	|	donkey weight	case study
+15:00-15:30	 | Data Joins	 |	Ex6-ToyBoatReshaping	
+15:30-16:00	| BREAK	 |	 &nbsp;
+16:00-17:00 |	Q&A		 |	&nbsp;
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
 
-# Header 1
-## Header 2
-### Header 3
+### Access RStudio Hub
 
-- Bulleted
-- List
+[RStudio Hub](https://workshop.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fdebnolan%2FTeachingDataScience&urlpath=%2Frstudio)
 
-1. Numbered
-2. List
+Login: email address
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/debnolan/TeachingDataScience/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Password: ![words](./images/pwd.png)
