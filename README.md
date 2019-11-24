@@ -5,7 +5,7 @@
 
 Time | Topic |  Exercises and Demos
 ------------ | -------------  | --------
-9 - 10 | Introduction  Computing | Ex1-GettingStartedWithR
+9 - 10 | Introduction  Computing | [Ex1-GettingStartedWithR](./exercises/Ex1-GettingStartedWithR.Rmd)
   &nbsp;     |   &nbsp;     | Ex1-DataTypesAndVectors
 10 - 11 | Simulation and Testing  |  Ex2-BloodPressureExpt
   &nbsp;     |   &nbsp;     | Ex2-RouletteSimulation
