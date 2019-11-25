@@ -5,9 +5,9 @@
 
 Time | Topic |  Exercises and Demos
 ------------ | -------------  | --------
-9 - 10 | Introduction  Computing | [Ex1-GettingStartedWithR](./exercises/Ex1-GettingStartedWithR.Rmd)
+9 - 10 | Introduction &amp; Computing | [Ex1-GettingStartedWithR](./exercises/Ex1-GettingStartedWithR.Rmd)
   &nbsp;     |   &nbsp;     | [Ex1-DataTypesAndVectors](./exercises/Ex1-DataTypesAndVectors.Rmd)
-10 - 11 | Simulation and Testing  |  [Ex2-BloodPressureExpt](./exercises/Ex2-BPExptTest.Rmd)
+10 - 11 | Simulation &amp; Testing  |  [Ex2-BloodPressureExpt](./exercises/Ex2-BPExptTest.Rmd)
   &nbsp;     |   &nbsp;     | [Ex2-RouletteSimulation](./exercises/Ex2-RouletteSimulation.Rmd)
 11:00-11:30 |	BREAK  | &nbsp;
 11:30-12:40 |	Visualization	 | [Ex3-Graphics-GGPlotIntro](./exercises/Ex3-Graphics-GGPlotIntro.Rmd)	
@@ -18,7 +18,7 @@ Time | Topic |  Exercises and Demos
 14:30-15:00 |	Data Science Life Cycle	|	[donkey weight	case study](./cases/donkeyAnalysis.Rmd)
 15:00-15:30	 | Data Joins	 |	[Ex6-ToyBoatReshaping](./exercises/Ex6-ToyBoatReshaping.Rmd)	
 15:30-16:00	| BREAK	 |	 &nbsp;
-16:00-17:00 |	Q&A		 |	&nbsp;
+16:00-17:00 |	Data Science Topics |	&nbsp;
 
 
 
